@@ -1,0 +1,6 @@
+export { default as Dashboard }  from "./Dashboard"
+export { default as TokenBills } from "./TokenBills"
+export { default as Profile }    from "./Profile"
+export { default as Instances }  from "./Instances"
+export { default as Tokens }     from "./Tokens"
+export { default as Reports }    from "./Reports"

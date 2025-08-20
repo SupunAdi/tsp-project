@@ -10,6 +10,7 @@ export interface NavItem {
   href: string;
   icon?: LucideIcon | React.ComponentType<{ className?: string }>;
   isActive?: boolean;
+  children?: NavItem[] 
 }
 
 export interface NavGroup {
@@ -36,6 +37,8 @@ export interface SharedData {
   sidebarOpen: boolean;
   [key: string]: unknown; // extensible
 }
+
+
 
 // interface SVGAttributes<T> extends AriaAttributes, DOMAttributes<T> {
 //         // React-specific Attributes
