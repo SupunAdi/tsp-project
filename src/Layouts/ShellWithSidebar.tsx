@@ -17,10 +17,21 @@ export default function ShellWithSidebar() {
 
   const breadcrumbsMap: Record<string, BreadcrumbItem[]> = {
     "/dashboard": [{ title: "Dashboard", href: "/dashboard" }],
-    "/token-bills": [
-      { title: "Dashboard", href: "/dashboard" },
-      { title: "Token Bill Management", href: "/token-bills" },
-    ],
+    // "/token-bills": [
+    //   { title: "Dashboard", href: "/dashboard" },
+    //   { title: "Token Bill Management", href: "/token-bills" },
+    // ],
+      "/token-bills/card-bins": [
+        { title: "Dashboard", href: "/dashboard" },
+        { title: "Token Bill Management", href: "/token-bills/card-bins" },
+        { title: "Card BINs", href: "/token-bills/card-bins" },
+        ],
+  "/token-bills/account-bins": [
+        { title: "Dashboard", href: "/dashboard" },
+        { title: "Token Bill Management", href: "/token-bills/account-bins" },
+        { title: "Account BINs", href: "/token-bills/account-bins" },
+      ],
+
     "/profile": [
       { title: "Dashboard", href: "/dashboard" },
       { title: "Profile Management", href: "/profile" },
