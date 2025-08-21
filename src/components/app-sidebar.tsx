@@ -26,18 +26,12 @@ const mainNavItems: NavItem[] = [
   { title: "Reporting",            href: "/reports",     icon: BarChart3 }
 ];
 
-// const footerNavItems: NavItem[] = [
-//   { title: "Repository", href: "https://github.com/laravel/react-starter-kit", icon: Folder },
-//   { title: "Documentation", href: "https://laravel.com/docs/starter-kits#react", icon: BookOpen },
-// ];
 
-type AppSidebarProps = {
-  user: AppUser;
-};
+type AppSidebarProps = { user: AppUser }
 
 export function AppSidebar({ user }: AppSidebarProps) {
   return (
-    <Sidebar collapsible="icon" variant="inset">
+    <Sidebar collapsible="icon" variant="inset"  >
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>

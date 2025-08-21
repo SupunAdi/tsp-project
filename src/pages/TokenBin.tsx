@@ -124,7 +124,65 @@ export default function TokenBills() {
         <div>
           <h1 className="text-2xl font-semibold">Token BIN Management</h1>
         </div>
+      </div>
 
+      {/*  Dummy KPI Cards  */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <CreditCard className="h-4 w-4" />
+              Total BINs
+            </CardTitle>
+            <CardDescription>All configured BINs</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-semibold">—</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4" />
+              Active
+            </CardTitle>
+            <CardDescription>Currently enabled</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-semibold">—</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <XCircle className="h-4 w-4" />
+              Deactive
+            </CardTitle>
+            <CardDescription>Currently disabled</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-semibold">—</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              Last Updated
+            </CardTitle>
+            <CardDescription>Most recent change</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-semibold">—</div>
+          </CardContent>
+        </Card>
+      </div>
+      {/* -------------------------------------------------------- */}
+
+      <div className="flex justify-end w-full -mt-1 mb-2">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button className="sm:ml-auto">Add New Card Bin</Button>
@@ -205,67 +263,12 @@ export default function TokenBills() {
           </DialogContent>
         </Dialog>
       </div>
-
-      {/*  Dummy KPI Cards  */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <CreditCard className="h-4 w-4" />
-              Total BINs
-            </CardTitle>
-            <CardDescription>All configured BINs</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-semibold">—</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4" />
-              Active
-            </CardTitle>
-            <CardDescription>Currently enabled</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-semibold">—</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <XCircle className="h-4 w-4" />
-              Deactive
-            </CardTitle>
-            <CardDescription>Currently disabled</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-semibold">—</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              Last Updated
-            </CardTitle>
-            <CardDescription>Most recent change</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-semibold">—</div>
-          </CardContent>
-        </Card>
-      </div>
-      {/* -------------------------------------------------------- */}
+      {/* -------------------------------------------------------------------- */}
 
       <div className="rounded-md border">
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="[&>th]:text-center">
               <TableHead>Token BIN</TableHead>
               <TableHead>Card Association</TableHead>
               <TableHead>Bank Code</TableHead>
@@ -284,16 +287,16 @@ export default function TokenBills() {
                 <TableCell>{r.cardAssociation}</TableCell>
                 <TableCell className="tabular-nums">{r.bankCode}</TableCell>
                 <TableCell>{r.bankCode.length}</TableCell>
-                <TableCell>
-                  <Badge variant={r.status === "active" ? "default" : "secondary"}>
-                    {r.status === "active" ? "Active" : "Deactive"}
-                  </Badge>
+                <TableCell className="text-center">
+                      <Badge variant={r.status === "active" ? "default" : "secondary"}>
+                        {r.status === "active" ? "Active" : "Deactive"}
+                      </Badge>
                 </TableCell>
                 <TableCell>{new Date(r.createdAt).toLocaleString()}</TableCell>
                 <TableCell>{new Date(r.updatedAt).toLocaleString()}</TableCell>
                 <TableCell>{r.updatedBy}</TableCell>
-                <TableCell>
-                  <Button
+                <TableCell className="text-center">
+                  <Button  className="h-6 w-20 justify-center px-0"
                     size="sm"
                     variant={r.status === "active" ? "destructive" : "default"}
                     onClick={() => toggleStatus(r.id)}
