@@ -189,7 +189,7 @@ export default function CardBinManagement() {
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Add New Card BIN</DialogTitle>
-              <DialogDescription>Fill details and click Save. This is a frontend preview only.</DialogDescription>
+              <DialogDescription>Fill details and click Save. .</DialogDescription>
             </DialogHeader>
 
             <div className="grid gap-4 py-2">

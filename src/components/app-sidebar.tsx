@@ -1,4 +1,3 @@
-import { NavFooter } from "@/components/nav-footer";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import {
@@ -12,13 +11,13 @@ import {
 } from "@/components/ui/sidebar";
 import type { NavItem, User as AppUser } from "@/types";
 import { Link } from "react-router-dom";
-import { BookOpen, Folder, LayoutGrid, User as UserIcon,ReceiptText,UserCog,Server,Coins,BarChart3,
+import {  LayoutGrid, User as UserIcon,ReceiptText,UserCog,Server,Coins,BarChart3,
    } from "lucide-react";
-// import AppLogo from "./app-logo";
+import AppLogo from "./app-logo";
 
 const mainNavItems: NavItem[] = [
   // { title: "Users", href: "/users", icon: UserIcon },
-    { title: "Dashboard",            href: "/dashboard",   icon: LayoutGrid },
+  { title: "Dashboard",            href: "/dashboard",   icon: LayoutGrid },
   { title: "Token Bill Management",href: "/token-bills", icon: ReceiptText },
   { title: "Profile Management",   href: "/profile",     icon: UserCog },
   { title: "Instance Management",  href: "/instances",   icon: Server },
@@ -37,7 +36,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link to="/dashboard">
-                {/* <AppLogo /> */}
+                <AppLogo />
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
