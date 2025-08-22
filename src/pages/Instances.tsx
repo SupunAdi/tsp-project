@@ -1,6 +1,3 @@
-//export default function Instances() { return <div className="p-6"><h1>Instance Management</h1></div>; }
-
-
 import { useMemo, useState } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
@@ -127,7 +124,65 @@ export default function TokenBills() {
         <div>
           <h1 className="text-2xl font-semibold">Token BIN Management</h1>
         </div>
+      </div>
 
+      {/*  Dummy KPI Cards  */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <CreditCard className="h-4 w-4" />
+              Total BINs
+            </CardTitle>
+            <CardDescription>All configured BINs</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-semibold">—</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4" />
+              Active
+            </CardTitle>
+            <CardDescription>Currently enabled</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-semibold">—</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <XCircle className="h-4 w-4" />
+              Deactive
+            </CardTitle>
+            <CardDescription>Currently disabled</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-semibold">—</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              Last Updated
+            </CardTitle>
+            <CardDescription>Most recent change</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-semibold">—</div>
+          </CardContent>
+        </Card>
+      </div>
+      {/* -------------------------------------------------------- */}
+
+      <div className="flex justify-end w-full -mt-1 mb-2">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button className="sm:ml-auto">Add New Card Bin</Button>
@@ -208,62 +263,7 @@ export default function TokenBills() {
           </DialogContent>
         </Dialog>
       </div>
-
-      {/*  Dummy KPI Cards  */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <CreditCard className="h-4 w-4" />
-              Total BINs
-            </CardTitle>
-            <CardDescription>All configured BINs</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-semibold">—</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4" />
-              Active
-            </CardTitle>
-            <CardDescription>Currently enabled</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-semibold">—</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <XCircle className="h-4 w-4" />
-              Deactive
-            </CardTitle>
-            <CardDescription>Currently disabled</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-semibold">—</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              Last Updated
-            </CardTitle>
-            <CardDescription>Most recent change</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-semibold">—</div>
-          </CardContent>
-        </Card>
-      </div>
-      {/* -------------------------------------------------------- */}
+      {/* -------------------------------------------------------------------- */}
 
       <div className="rounded-md border">
         <Table>
