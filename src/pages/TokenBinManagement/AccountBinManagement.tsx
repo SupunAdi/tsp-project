@@ -4,8 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
+import {Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
@@ -27,6 +26,17 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card"
+
+import { MoreHorizontal } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
 
 import { CreditCard, CheckCircle2, XCircle, Clock } from "lucide-react"
 
@@ -171,7 +181,7 @@ export default function AccountBinManagement() {
         </Card>
       </div>
 
-      {/* Add New button (right-aligned, under cards) */}
+      {/* Add New button  */}
       <div className="flex justify-end w-full -mt-1 mb-2">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -283,14 +293,34 @@ export default function AccountBinManagement() {
                 <TableCell>{new Date(r.updatedAt).toLocaleString()}</TableCell>
                 <TableCell>{r.updatedBy}</TableCell>
                 <TableCell className="text-center">
-                  <Button
-                    className="h-6 w-20 justify-center px-0"
-                    size="sm"
-                    variant={r.status === "active" ? "destructive" : "default"}
-                    onClick={() => toggleStatus(r.id)}
-                  >
-                    {r.status === "active" ? "Deactivate" : "Activate"}
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+                        <span className="sr-only">Open menu</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+
+                      <DropdownMenuItem onClick={() => toggleStatus(r.id)}>
+                        {r.status === "active" ? "Deactivate" : "Activate"}
+                      </DropdownMenuItem>
+
+                      <DropdownMenuSeparator />
+
+                      <DropdownMenuItem onClick={() => alert(`Editing ${r.accountBin}`)}>
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => alert(`Deleting ${r.accountBin}`)}>
+                        Delete
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => alert(`Viewing ${r.accountBin}`)}>
+                        View
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}

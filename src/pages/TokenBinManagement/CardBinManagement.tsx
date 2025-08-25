@@ -20,14 +20,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card"
-
+import {Card,CardContent,CardHeader,CardTitle,CardDescription,} from "@/components/ui/card"
+import { MoreHorizontal } from "lucide-react"
+import {DropdownMenu,DropdownMenuContent,DropdownMenuItem,DropdownMenuLabel,DropdownMenuSeparator,DropdownMenuTrigger,} from "@/components/ui/dropdown-menu"
 import { CreditCard, CheckCircle2, XCircle, Clock } from "lucide-react"
 
 import PaginationBar from "@/components/pagination-bar"
@@ -295,14 +290,34 @@ export default function CardBinManagement() {
                 <TableCell>{new Date(r.updatedAt).toLocaleString()}</TableCell>
                 <TableCell>{r.updatedBy}</TableCell>
                 <TableCell className="text-center">
-                  <Button
-                    className="h-6 w-20 justify-center px-0"
-                    size="sm"
-                    variant={r.status === "active" ? "destructive" : "default"}
-                    onClick={() => toggleStatus(r.id)}
-                  >
-                    {r.status === "active" ? "Deactivate" : "Activate"}
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+                        <span className="sr-only">Open menu</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+
+                      <DropdownMenuItem onClick={() => toggleStatus(r.id)}>
+                        {r.status === "active" ? "Deactivate" : "Activate"}
+                      </DropdownMenuItem>
+
+                      <DropdownMenuSeparator />
+
+                      <DropdownMenuItem onClick={() => alert(`Editing BIN ${r.tokenBin}`)}>
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => alert(`Deleting BIN ${r.tokenBin}`)}>
+                        Delete
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => alert(`Viewing BIN ${r.tokenBin}`)}>
+                        View
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}
