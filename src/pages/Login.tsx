@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import InputError from "@/components/input-error"      // you already have this
+import InputError from "@/components/input-error"      
 import { LoaderCircle } from "lucide-react"
 
 type Errors = { email?: string; password?: string }

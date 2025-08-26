@@ -1,5 +1,5 @@
 import { Outlet, useLocation } from "react-router-dom"
-import { SidebarProvider } from "@/components/ui/sidebar"
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { AppHeader } from "@/components/app-header"
 import type { BreadcrumbItem, User as AppUser } from "@/types"
@@ -17,10 +17,7 @@ export default function ShellWithSidebar() {
 
   const breadcrumbsMap: Record<string, BreadcrumbItem[]> = {
     "/dashboard": [{ title: "Dashboard", href: "/dashboard" }],
-    // "/token-bills": [
-    //   { title: "Dashboard", href: "/dashboard" },
-    //   { title: "Token Bill Management", href: "/token-bills" },
-    // ],
+    
       "/token-bills/card-bins": [
         { title: "Dashboard", href: "/dashboard" },
         { title: "Token Bill Management", href: "/token-bills/card-bins" },
@@ -48,6 +45,16 @@ export default function ShellWithSidebar() {
       { title: "Dashboard", href: "/dashboard" },
       { title: "Reporting", href: "/reports" },
     ],
+     "/settings/profile": [
+    { title: "Dashboard", href: "/dashboard" },
+    { title: "Settings", href: "/settings/profile" },
+    { title: "Profile", href: "/settings/profile" },
+      ],
+      "/settings/appearance": [
+        { title: "Dashboard", href: "/dashboard" },
+        { title: "Settings", href: "/settings/appearance" },
+        { title: "Appearance", href: "/settings/appearance" },
+      ],
   }
   const breadcrumbs = breadcrumbsMap[pathname] ?? []
 
@@ -55,13 +62,11 @@ export default function ShellWithSidebar() {
      <SidebarProvider>
       {/* Page background uses the global background token */}
       <div className="flex min-h-screen bg-background">
-        {/* Sidebar column only uses the sidebar token */}
-        <aside className="sticky top-0 h-screen w-[260px] shrink-0 bg-sidebar border-r border-sidebar-border">
           <AppSidebar user={currentUser} />
-        </aside>
 
         {/* Content column gets a subtle panel background */}
         <div className="flex-1 min-w-0 flex flex-col bg-muted/40">
+           <SidebarTrigger className="m-2" />
           <AppHeader breadcrumbs={breadcrumbs} />
           <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-0">
             <Outlet />

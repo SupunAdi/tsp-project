@@ -276,8 +276,7 @@ export default function CardBinManagement() {
       </div>
 
       {/* Table */}
-      <div className="rounded-md border overflow-x-auto">
-        <div className="min-w-[1100px]">
+      <div className="rounded-md border ">
         <Table>
           <TableHeader>
             <TableRow className="[&>th]:text-center">
@@ -369,7 +368,6 @@ export default function CardBinManagement() {
             ))}
           </TableBody>
         </Table>
-        </div>
       </div>
 
       {/* Pagination */}

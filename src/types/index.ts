@@ -2,13 +2,14 @@ import type { LucideIcon } from "lucide-react";
 
 export interface BreadcrumbItem {
   title: string;
-  href: string; // use your router's path
+  href: string; // use router's path
 }
 
 export interface NavItem {
   title: string;
   href: string;
-  icon?: LucideIcon | React.ComponentType<{ className?: string }>;
+  // icon?: LucideIcon | React.ComponentType<{ className?: string }>;
+    icon?: LucideIcon | React.ComponentType<{ className?: string }> | null ;
   isActive?: boolean;
   children?: NavItem[] 
 }
