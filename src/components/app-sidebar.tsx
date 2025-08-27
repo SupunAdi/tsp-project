@@ -30,7 +30,7 @@ type AppSidebarProps = { user: AppUser }
 
 export function AppSidebar({ user }: AppSidebarProps) {
   return (
-    <Sidebar collapsible="icon" variant="inset"  >
+    <Sidebar collapsible="icon" variant="inset"  className="z-50">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
