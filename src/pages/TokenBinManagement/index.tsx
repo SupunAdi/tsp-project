@@ -35,7 +35,6 @@ export default function TokenBinManagementLayout() {
           ))}
         </nav>
       </div>
-
       {/* Tab content */}
       <Outlet />
     </div>
