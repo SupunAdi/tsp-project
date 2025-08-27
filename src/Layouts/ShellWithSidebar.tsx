@@ -66,7 +66,7 @@ export default function ShellWithSidebar() {
 
         {/* Content column gets a subtle panel background */}
         <div className="flex-1 min-w-0 flex flex-col bg-muted/40">
-           <SidebarTrigger className="m-2" />
+           {/* <SidebarTrigger className="m-2" /> */}
           <AppHeader breadcrumbs={breadcrumbs} />
           <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-0">
             <Outlet />

@@ -1,26 +1,10 @@
-// AppHeader (no Laravel / no Inertia)
 import { Breadcrumbs } from "@/components/breadcrumbs"
 import { Icon } from "@/components/icon"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuList,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu"
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
+import { DropdownMenu,DropdownMenuContent,DropdownMenuTrigger,} from "@/components/ui/dropdown-menu"
+import { NavigationMenu,NavigationMenuItem,NavigationMenuList,navigationMenuTriggerStyle,} from "@/components/ui/navigation-menu"
+import {Sheet,SheetContent,SheetHeader,SheetTitle,SheetTrigger,} from "@/components/ui/sheet"
 // import {
 //   Tooltip,
 //   TooltipContent,
@@ -34,6 +18,7 @@ import type { BreadcrumbItem, NavItem } from "@/types"
 import { NavLink, useLocation } from "react-router-dom"
 
 import { LayoutGrid, Menu, Search } from "lucide-react"
+import { SidebarTrigger } from "./ui/sidebar"
 //import AppLogo from "./app-logo"
 //import AppLogoIcon from "./app-logo-icon"
 
@@ -114,6 +99,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
               </SheetContent>
             </Sheet>
           </div>
+           <SidebarTrigger className="m-2" />   
 
           {/* Brand */}
           <NavLink to="/dashboard" className="flex items-center space-x-2">
