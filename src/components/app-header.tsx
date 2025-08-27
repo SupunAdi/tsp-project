@@ -70,11 +70,11 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
           {/* Mobile Menu */}
           <div className="lg:hidden">
             <Sheet>
-              <SheetTrigger asChild>
+              {/* <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="mr-2 h-[34px] w-[34px]">
                   <Menu className="h-5 w-5" />
                 </Button>
-              </SheetTrigger>
+              </SheetTrigger> */}
               <SheetContent side="left" className="flex h-full w-64 flex-col items-stretch justify-between bg-sidebar">
                 <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                 <SheetHeader className="flex justify-start text-left">
