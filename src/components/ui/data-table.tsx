@@ -1,37 +1,11 @@
-"use client"
-
 import * as React from "react"
-import {
-  ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  VisibilityState,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table"
+import type {ColumnDef,ColumnFiltersState,SortingState,VisibilityState,} from "@tanstack/react-table"
+import {flexRender,getCoreRowModel,getFilteredRowModel,getPaginationRowModel,getSortedRowModel,useReactTable,} from "@tanstack/react-table"
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import {Table,TableBody,TableCell,TableHead,TableHeader,TableRow,} from "@/components/ui/table"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+import {DropdownMenu,DropdownMenuCheckboxItem,DropdownMenuContent,DropdownMenuTrigger,DropdownMenuLabel,DropdownMenuSeparator,} from "@/components/ui/dropdown-menu";
 import { Settings2 } from "lucide-react"
 
 interface DataTableProps<TData, TValue> {
@@ -64,17 +38,21 @@ export function DataTable<TData, TValue>({
     },
   })
 
+  // const emailCol = table.getColumn("email");
+  const emailCol = table.getAllColumns().find(c => c.id === "email");
+
+
   return (
     <div>
       <div className="flex items-center py-4">
-        <Input
-          placeholder="Filter emails..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
+        {emailCol && (
+          <Input
+            placeholder="Filter email..."
+            value={(emailCol.getFilterValue() as string) ?? ""}
+            onChange={(e) => emailCol.setFilterValue(e.target.value)}
+            className="max-w-sm"
+          />
+        )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

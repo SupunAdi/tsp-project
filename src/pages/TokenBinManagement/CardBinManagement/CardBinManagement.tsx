@@ -4,57 +4,21 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {Select,SelectContent,SelectItem,SelectTrigger,SelectValue,} from "@/components/ui/select"
-import {Dialog,DialogContent,DialogDescription,DialogFooter,DialogHeader,DialogTitle,DialogTrigger,} from "@/components/ui/dialog"
-import {Card,CardContent,CardHeader,CardTitle,CardDescription,} from "@/components/ui/card"
-import {DropdownMenu,DropdownMenuContent,DropdownMenuItem,DropdownMenuLabel,DropdownMenuSeparator,DropdownMenuTrigger,} from "@/components/ui/dropdown-menu"
-import { CreditCard, CheckCircle2, XCircle, Clock } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { CreditCard, CheckCircle2, XCircle, Clock, ArrowUp, ArrowDown, MoreHorizontal } from "lucide-react"
 import PaginationBar from "@/components/pagination-bar"
 import { usePagination } from "@/hooks/use-pagination"
-import { ArrowUpDown, ArrowUp, ArrowDown, MoreHorizontal } from "lucide-react"
 
-
-// ----------------------- Types & Sample Data -----------------------
-
-type TokenBinRecord = {
-  id: string
-  tokenBin: string
-  cardAssociation: "Visa" | "Mastercard" | "Amex" | "Discover" | "JCB" | "UnionPay"
-  bankCode: string
-  status: "active" | "deactive"
-  createdAt: string
-  updatedAt: string
-  updatedBy: string
-}
-
-const NOW = new Date()
-const fmt = (d: Date) => new Date(d).toISOString()
-
-const INITIAL_ROWS: TokenBinRecord[] = [
-  { id: "1",  tokenBin: "412345", cardAssociation: "Visa",       bankCode: "BNK00123", status: "active",   createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Alice" },
-  { id: "2",  tokenBin: "512345", cardAssociation: "Mastercard", bankCode: "CBA45",    status: "deactive", createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Bob"   },
-  { id: "3",  tokenBin: "622222", cardAssociation: "UnionPay",   bankCode: "UP9988",   status: "active",   createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Cara"  },
-  { id: "4",  tokenBin: "371111", cardAssociation: "Amex",       bankCode: "AMX77",    status: "active",   createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Dana"  },
-  { id: "5",  tokenBin: "601155", cardAssociation: "Discover",   bankCode: "DISC001",  status: "deactive", createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Evan"  },
-  { id: "6",  tokenBin: "352800", cardAssociation: "JCB",        bankCode: "JCB12",    status: "active",   createdAt: fmt(new Date(+NOW - 9e7)), updatedAt: fmt(new Date(+NOW - 5e7)), updatedBy: "Alex" },
-  { id: "7",  tokenBin: "455667", cardAssociation: "Visa",       bankCode: "V45",      status: "active",   createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Mia"   },
-  { id: "8",  tokenBin: "545454", cardAssociation: "Mastercard", bankCode: "MC0099",   status: "deactive", createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Noah"  },
-  { id: "9",  tokenBin: "378282", cardAssociation: "Amex",       bankCode: "AM3X",     status: "active",   createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Ivy"   },
-  { id: "10", tokenBin: "601100", cardAssociation: "Discover",   bankCode: "D1",       status: "active",   createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Omar"  },
-  { id: "11", tokenBin: "353011", cardAssociation: "JCB",        bankCode: "JCB0007",  status: "deactive", createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Rae"   },
-  { id: "12", tokenBin: "400000", cardAssociation: "Visa",       bankCode: "BANKX",    status: "active",   createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Leo"   },
-]
-
-// dropdown options
-const CARD_ASSOCIATIONS: TokenBinRecord["cardAssociation"][] = [
-  "Visa", "Mastercard", "Amex", "Discover", "JCB", "UnionPay",
-]
-const BANK_CODES = [
-  "BNK00123", "CBA45", "UP9988", "AMX77", "DISC001", "JCB12",
-  "V45", "MC0099", "AM3X", "D1", "JCB0007", "BANKX",
-]
-
-// ----------------------- Component -----------------------
+// import shared types/data/options from columns.tsx (logic unchanged)
+import {
+  INITIAL_ROWS,
+  CARD_ASSOCIATIONS,
+  BANK_CODES,
+  type TokenBinRecord,
+} from "./columns"
 
 export default function CardBinManagement() {
   const [rows, setRows] = useState<TokenBinRecord[]>(INITIAL_ROWS)
@@ -73,15 +37,14 @@ export default function CardBinManagement() {
 
   const binSize = form.bin.replace(/\D/g, "").length
 
-  //
-    //sorting
-  // type SortKey = "tokenBin" | "association" | "bankCode" |  "createdAt" | "updatedAt" | "updatedBy"
-  type SortKey = "tokenBin" | "cardAssociation" | "bankCode" | "status" |  "createdAt" | "updatedAt" | "updatedBy"
-
+  // ------- sorting (kept exactly as your pattern) -------
+  type SortKey = "tokenBin" | "cardAssociation" | "bankCode" | "status" | "createdAt" | "updatedAt" | "updatedBy"
   type SortState = { key: SortKey; dir: "asc" | "desc" } | null
   const [sort, setSort] = useState<SortState>(null)
+
   const iconFor = (active: boolean, dir?: "asc" | "desc") =>
-    !active ? <ArrowUpDown className="ml-2 h-4 w-4" /> : dir === "asc" ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />
+    !active ? null : dir === "asc" ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />
+
   const toggleHeaderSort = (key: SortKey) =>
     setSort((prev) => (prev?.key === key ? { key, dir: prev.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }))
 
@@ -102,7 +65,7 @@ export default function CardBinManagement() {
     })
     return arr
   }, [rows, sort])
-  //
+  // ------------------------------------------------------
 
   // pagination
   const { page, setPage, pageSize, setPageSize, pageCount, range } = usePagination(sortedRows.length, 5)
@@ -125,7 +88,6 @@ export default function CardBinManagement() {
     )
 
   const handleSave = () => {
-    // stub for future backend connect
     console.log("Saving (stub):", {
       tokenBin: form.bin.replace(/\D/g, ""),
       cardAssociation: form.cardAssociation,
@@ -192,7 +154,7 @@ export default function CardBinManagement() {
         </Card>
       </div>
 
-      {/* Add New button (right-aligned, under cards) */}
+      {/* Add New */}
       <div className="flex justify-end w-full -mt-1 mb-2">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -201,7 +163,7 @@ export default function CardBinManagement() {
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Add New Card BIN</DialogTitle>
-              <DialogDescription>Fill details and click Save. .</DialogDescription>
+              <DialogDescription>Fill details and click Save.</DialogDescription>
             </DialogHeader>
 
             <div className="grid gap-4 py-2">
@@ -276,7 +238,7 @@ export default function CardBinManagement() {
       </div>
 
       {/* Table */}
-      <div className="rounded-md border ">
+      <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow className="[&>th]:text-center">
@@ -319,12 +281,14 @@ export default function CardBinManagement() {
               <TableHead className="w-[140px]">Action</TableHead>
             </TableRow>
           </TableHeader>
+
           <TableBody>
             {currentRows.map((r) => (
               <TableRow key={r.id}>
                 <TableCell className="font-medium">{r.tokenBin}</TableCell>
                 <TableCell>{r.cardAssociation}</TableCell>
                 <TableCell className="tabular-nums">{r.bankCode}</TableCell>
+                {/* keeping your original logic here */}
                 <TableCell>{r.bankCode.length}</TableCell>
                 <TableCell className="text-center">
                   <Badge variant={r.status === "active" ? "default" : "secondary"}>

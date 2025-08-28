@@ -4,46 +4,21 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {Select,SelectContent,SelectItem,SelectTrigger,SelectValue,} from "@/components/ui/select"
-import {Dialog,DialogContent,DialogDescription,DialogFooter,DialogHeader,DialogTitle,DialogTrigger,} from "@/components/ui/dialog"
-import {Card,CardContent,CardHeader,CardTitle,CardDescription,} from "@/components/ui/card"
-import {DropdownMenu,DropdownMenuContent,DropdownMenuItem,DropdownMenuLabel,DropdownMenuSeparator,DropdownMenuTrigger,} from "@/components/ui/dropdown-menu"
-import { CreditCard, CheckCircle2, XCircle, Clock } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { CreditCard, CheckCircle2, XCircle, Clock, ArrowUp, ArrowDown, MoreHorizontal } from "lucide-react"
 import PaginationBar from "@/components/pagination-bar"
 import { usePagination } from "@/hooks/use-pagination"
-import { ArrowUpDown, ArrowUp, ArrowDown, MoreHorizontal } from "lucide-react"
 
-// ----------------------- Types & Sample Data -----------------------
-
-type AccountBinRecord = {
-  id: string
-  accountBin: string
-  association: "Visa" | "Mastercard" | "Amex" | "Discover" | "JCB" | "UnionPay"
-  bankCode: string
-  status: "active" | "deactive"
-  createdAt: string
-  updatedAt: string
-  updatedBy: string
-}
-
-const NOW = new Date().toISOString()
-
-const INITIAL_ROWS: AccountBinRecord[] = [
-  { id: "a1", accountBin: "ACC-1001", association: "Visa",       bankCode: "BNK00123", status: "active",   createdAt: NOW, updatedAt: NOW, updatedBy: "Alice" },
-  { id: "a2", accountBin: "ACC-1002", association: "Mastercard", bankCode: "CBA45",    status: "deactive", createdAt: NOW, updatedAt: NOW, updatedBy: "Bob" },
-  { id: "a3", accountBin: "ACC-1003", association: "UnionPay",   bankCode: "UP9988",   status: "active",   createdAt: NOW, updatedAt: NOW, updatedBy: "Cara" },
-]
-
-// dropdown options
-const ASSOCIATIONS: AccountBinRecord["association"][] = [
-  "Visa", "Mastercard", "Amex", "Discover", "JCB", "UnionPay",
-]
-const BANK_CODES = [
-  "BNK00123", "CBA45", "UP9988", "AMX77", "DISC001", "JCB12",
-  "V45", "MC0099", "AM3X", "D1", "JCB0007", "BANKX",
-]
-
-// ----------------------- Component -----------------------
+// import shared types/data/options from columns.tsx
+import {
+  INITIAL_ROWS,
+  ASSOCIATIONS,
+  BANK_CODES as ACCOUNT_BANK_CODES,
+  type AccountBinRecord,
+} from "./columns"
 
 export default function AccountBinManagement() {
   const [rows, setRows] = useState<AccountBinRecord[]>(INITIAL_ROWS)
@@ -57,18 +32,20 @@ export default function AccountBinManagement() {
   }>({
     accountBin: "",
     association: ASSOCIATIONS[0],
-    bankCode: BANK_CODES[0],
+    bankCode: ACCOUNT_BANK_CODES[0],
   })
 
   // length of digits within accountBin (e.g. "ACC-1001" -> 4)
   const accountBinSize = form.accountBin.replace(/\D/g, "").length
 
-  //sorting
+  // ------- sorting (kept exactly as your pattern) -------
   type SortKey = "accountBin" | "association" | "bankCode" | "status" | "createdAt" | "updatedAt" | "updatedBy"
   type SortState = { key: SortKey; dir: "asc" | "desc" } | null
   const [sort, setSort] = useState<SortState>(null)
+
   const iconFor = (active: boolean, dir?: "asc" | "desc") =>
-    !active ? <ArrowUpDown className="ml-2 h-4 w-4" /> : dir === "asc" ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />
+    !active ? null : dir === "asc" ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />
+
   const toggleHeaderSort = (key: SortKey) =>
     setSort((prev) => (prev?.key === key ? { key, dir: prev.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }))
 
@@ -89,13 +66,13 @@ export default function AccountBinManagement() {
     })
     return arr
   }, [rows, sort])
+  // ------------------------------------------------------
 
-  // pagination (same pattern as CardBinManagement)
-const { page, setPage, pageSize, setPageSize, pageCount, range } = usePagination(sortedRows.length, 5)
-const startIdx = (page - 1) * pageSize
-const endIdx = startIdx + pageSize
-const currentRows = useMemo(() => sortedRows.slice(startIdx, endIdx), [sortedRows, startIdx, endIdx])
-
+  // pagination
+  const { page, setPage, pageSize, setPageSize, pageCount, range } = usePagination(sortedRows.length, 5)
+  const startIdx = (page - 1) * pageSize
+  const endIdx = startIdx + pageSize
+  const currentRows = useMemo(() => sortedRows.slice(startIdx, endIdx), [sortedRows, startIdx, endIdx])
 
   const toggleStatus = (id: string) =>
     setRows((prev) =>
@@ -112,7 +89,6 @@ const currentRows = useMemo(() => sortedRows.slice(startIdx, endIdx), [sortedRow
     )
 
   const handleSave = () => {
-    // stub for future backend connect
     console.log("Saving (stub):", {
       accountBin: form.accountBin,
       association: form.association,
@@ -121,9 +97,10 @@ const currentRows = useMemo(() => sortedRows.slice(startIdx, endIdx), [sortedRow
     })
     setOpen(false)
   }
+
   return (
     <div className="space-y-4">
-      {/* KPI Cards (mirrors CardBinManagement style) */}
+      {/* KPI Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
@@ -178,7 +155,7 @@ const currentRows = useMemo(() => sortedRows.slice(startIdx, endIdx), [sortedRow
         </Card>
       </div>
 
-      {/* Add New button  */}
+      {/* Add New */}
       <div className="flex justify-end w-full -mt-1 mb-2">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -187,7 +164,7 @@ const currentRows = useMemo(() => sortedRows.slice(startIdx, endIdx), [sortedRow
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Add New Account BIN</DialogTitle>
-              <DialogDescription>Fill details and click Save. </DialogDescription>
+              <DialogDescription>Fill details and click Save.</DialogDescription>
             </DialogHeader>
 
             <div className="grid gap-4 py-2">
@@ -243,7 +220,7 @@ const currentRows = useMemo(() => sortedRows.slice(startIdx, endIdx), [sortedRow
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    {BANK_CODES.map((code) => (
+                    {ACCOUNT_BANK_CODES.map((code) => (
                       <SelectItem key={code} value={code}>
                         {code}
                       </SelectItem>
@@ -264,45 +241,45 @@ const currentRows = useMemo(() => sortedRows.slice(startIdx, endIdx), [sortedRow
       <div className="rounded-md border">
         <Table>
           <TableHeader>
-  <TableRow className="[&>th]:text-center">
-    <TableHead>
-      <Button variant="ghost" onClick={() => toggleHeaderSort("accountBin")} className="mx-auto">
-        Account BIN {iconFor(sort?.key === "accountBin", sort?.dir)}
-      </Button>
-    </TableHead>
-    <TableHead>
-      <Button variant="ghost" onClick={() => toggleHeaderSort("association")} className="mx-auto">
-        Association {iconFor(sort?.key === "association", sort?.dir)}
-      </Button>
-    </TableHead>
-    <TableHead>
-      <Button variant="ghost" onClick={() => toggleHeaderSort("bankCode")} className="mx-auto">
-        Bank Code {iconFor(sort?.key === "bankCode", sort?.dir)}
-      </Button>
-    </TableHead>
-    <TableHead>
-      <Button variant="ghost" onClick={() => toggleHeaderSort("status")} className="mx-auto">
-        Status {iconFor(sort?.key === "status", sort?.dir)}
-      </Button>
-    </TableHead>
-    <TableHead>
-      <Button variant="ghost" onClick={() => toggleHeaderSort("createdAt")} className="mx-auto">
-        Create time {iconFor(sort?.key === "createdAt", sort?.dir)}
-      </Button>
-    </TableHead>
-    <TableHead>
-      <Button variant="ghost" onClick={() => toggleHeaderSort("updatedAt")} className="mx-auto">
-        Update time {iconFor(sort?.key === "updatedAt", sort?.dir)}
-      </Button>
-    </TableHead>
-    <TableHead>
-      <Button variant="ghost" onClick={() => toggleHeaderSort("updatedBy")} className="mx-auto">
-        Last update user {iconFor(sort?.key === "updatedBy", sort?.dir)}
-      </Button>
-    </TableHead>
-    <TableHead className="w-[140px]">Action</TableHead>
-  </TableRow>
-</TableHeader>
+            <TableRow className="[&>th]:text-center">
+              <TableHead>
+                <Button variant="ghost" onClick={() => toggleHeaderSort("accountBin")} className="mx-auto">
+                  Account BIN {iconFor(sort?.key === "accountBin", sort?.dir)}
+                </Button>
+              </TableHead>
+              <TableHead>
+                <Button variant="ghost" onClick={() => toggleHeaderSort("association")} className="mx-auto">
+                  Association {iconFor(sort?.key === "association", sort?.dir)}
+                </Button>
+              </TableHead>
+              <TableHead>
+                <Button variant="ghost" onClick={() => toggleHeaderSort("bankCode")} className="mx-auto">
+                  Bank Code {iconFor(sort?.key === "bankCode", sort?.dir)}
+                </Button>
+              </TableHead>
+              <TableHead>
+                <Button variant="ghost" onClick={() => toggleHeaderSort("status")} className="mx-auto">
+                  Status {iconFor(sort?.key === "status", sort?.dir)}
+                </Button>
+              </TableHead>
+              <TableHead>
+                <Button variant="ghost" onClick={() => toggleHeaderSort("createdAt")} className="mx-auto">
+                  Create time {iconFor(sort?.key === "createdAt", sort?.dir)}
+                </Button>
+              </TableHead>
+              <TableHead>
+                <Button variant="ghost" onClick={() => toggleHeaderSort("updatedAt")} className="mx-auto">
+                  Update time {iconFor(sort?.key === "updatedAt", sort?.dir)}
+                </Button>
+              </TableHead>
+              <TableHead>
+                <Button variant="ghost" onClick={() => toggleHeaderSort("updatedBy")} className="mx-auto">
+                  Last update user {iconFor(sort?.key === "updatedBy", sort?.dir)}
+                </Button>
+              </TableHead>
+              <TableHead className="w-[140px]">Action</TableHead>
+            </TableRow>
+          </TableHeader>
 
           <TableBody>
             {currentRows.map((r) => (

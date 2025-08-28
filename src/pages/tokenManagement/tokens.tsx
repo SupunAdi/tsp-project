@@ -1,75 +1,18 @@
 import { useMemo, useState } from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card"
-
-import { CreditCard, CheckCircle2, XCircle, Clock } from "lucide-react"
-
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import PaginationBar from "@/components/pagination-bar"
 import { usePagination } from "@/hooks/use-pagination"
+import { CreditCard, CheckCircle2, XCircle, Clock } from "lucide-react"
 
-type TokenBinRecord = {
-  id: string
-  tokenBin: string
-  cardAssociation: "Visa" | "Mastercard" | "Amex" | "Discover" | "JCB" | "UnionPay"
-  bankCode: string
-  status: "active" | "deactive"
-  createdAt: string
-  updatedAt: string
-  updatedBy: string
-}
+import { DataTable } from "@/components/ui/data-table"
 
-const NOW = new Date()
-const fmt = (d: Date) => new Date(d).toISOString()
-
-const INITIAL_ROWS: TokenBinRecord[] = [
-  { id: "1",  tokenBin: "412345", cardAssociation: "Visa",       bankCode: "BNK00123", status: "active",  createdAt: fmt(NOW),               updatedAt: fmt(NOW),               updatedBy: "Alice" },
-  { id: "2",  tokenBin: "512345", cardAssociation: "Mastercard", bankCode: "CBA45",   status: "deactive",createdAt: fmt(NOW),               updatedAt: fmt(NOW),               updatedBy: "Bob"   },
-  { id: "3",  tokenBin: "622222", cardAssociation: "UnionPay",   bankCode: "UP9988",  status: "active",  createdAt: fmt(NOW),               updatedAt: fmt(NOW),               updatedBy: "Cara"  },
-  { id: "4",  tokenBin: "371111", cardAssociation: "Amex",       bankCode: "AMX77",   status: "active",  createdAt: fmt(NOW),               updatedAt: fmt(NOW),               updatedBy: "Dana"  },
-  { id: "5",  tokenBin: "601155", cardAssociation: "Discover",   bankCode: "DISC001", status: "deactive",createdAt: fmt(NOW),               updatedAt: fmt(NOW),               updatedBy: "Evan"  },
-  { id: "6",  tokenBin: "352800", cardAssociation: "JCB",        bankCode: "JCB12",   status: "active",  createdAt: fmt(new Date(+NOW-9e7)), updatedAt: fmt(new Date(+NOW-5e7)), updatedBy: "Alex"  },
-  { id: "7",  tokenBin: "455667", cardAssociation: "Visa",       bankCode: "V45",     status: "active",  createdAt: fmt(NOW),               updatedAt: fmt(NOW),               updatedBy: "Mia"   },
-  { id: "8",  tokenBin: "545454", cardAssociation: "Mastercard", bankCode: "MC0099",  status: "deactive",createdAt: fmt(NOW),               updatedAt: fmt(NOW),               updatedBy: "Noah"  },
-  { id: "9",  tokenBin: "378282", cardAssociation: "Amex",       bankCode: "AM3X",    status: "active",  createdAt: fmt(NOW),               updatedAt: fmt(NOW),               updatedBy: "Ivy"   },
-  { id: "10", tokenBin: "601100", cardAssociation: "Discover",   bankCode: "D1",      status: "active",  createdAt: fmt(NOW),               updatedAt: fmt(NOW),               updatedBy: "Omar"  },
-  { id: "11", tokenBin: "353011", cardAssociation: "JCB",        bankCode: "JCB0007", status: "deactive",createdAt: fmt(NOW),               updatedAt: fmt(NOW),               updatedBy: "Rae"   },
-  { id: "12", tokenBin: "400000", cardAssociation: "Visa",       bankCode: "BANKX",   status: "active",  createdAt: fmt(NOW),               updatedAt: fmt(NOW),               updatedBy: "Leo"   },
-]
-
-// sample dropdown options
-const CARD_ASSOCIATIONS: TokenBinRecord["cardAssociation"][] = [
-  "Visa", "Mastercard", "Amex", "Discover", "JCB", "UnionPay",
-]
-const BANK_CODES = [
-  "BNK00123", "CBA45", "UP9988", "AMX77", "DISC001", "JCB12",
-  "V45", "MC0099", "AM3X", "D1", "JCB0007", "BANKX",
-]
+import type { TokenBinRecord } from "./columns"
+import { createColumns, INITIAL_ROWS, CARD_ASSOCIATIONS, BANK_CODES } from "./columns"
 
 export default function TokenBills() {
   const [rows, setRows] = useState<TokenBinRecord[]>(INITIAL_ROWS)
@@ -88,12 +31,12 @@ export default function TokenBills() {
 
   const binSize = form.bin.replace(/\D/g, "").length
 
-  // pagination 
   const { page, setPage, pageSize, setPageSize, pageCount, range } = usePagination(rows.length, 5)
   const startIdx = (page - 1) * pageSize
   const endIdx = startIdx + pageSize
   const currentRows = useMemo(() => rows.slice(startIdx, endIdx), [rows, startIdx, endIdx])
 
+  // status toggle 
   const toggleStatus = (id: string) =>
     setRows((prev) =>
       prev.map((r) =>
@@ -118,15 +61,17 @@ export default function TokenBills() {
     setOpen(false)
   }
 
+  const columns = useMemo(() => createColumns({ onToggleStatus: toggleStatus }), [])
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold">Token BIN Management</h1>
+          <h1 className="text-2xl font-semibold">Token Management</h1>
         </div>
       </div>
 
-      {/*  Dummy KPI Cards  */}
+      {/* KPI Cards  */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
@@ -180,8 +125,8 @@ export default function TokenBills() {
           </CardContent>
         </Card>
       </div>
-      {/* -------------------------------------------------------- */}
 
+      {/* Add New Modal  */}
       <div className="flex justify-end w-full -mt-1 mb-2">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -263,51 +208,10 @@ export default function TokenBills() {
           </DialogContent>
         </Dialog>
       </div>
-      {/* -------------------------------------------------------------------- */}
 
+      {/* DataTable using tanstack/react-table */}
       <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow className="[&>th]:text-center">
-              <TableHead>Token BIN</TableHead>
-              <TableHead>Card Association</TableHead>
-              <TableHead>Bank Code</TableHead>
-              <TableHead>BIN Size</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Create time</TableHead>
-              <TableHead>Update time</TableHead>
-              <TableHead>Last update user</TableHead>
-              <TableHead className="w-[140px]">Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {currentRows.map((r) => (
-              <TableRow key={r.id}>
-                <TableCell className="font-medium">{r.tokenBin}</TableCell>
-                <TableCell>{r.cardAssociation}</TableCell>
-                <TableCell className="tabular-nums">{r.bankCode}</TableCell>
-                <TableCell>{r.bankCode.length}</TableCell>
-                <TableCell className="text-center">
-                      <Badge variant={r.status === "active" ? "default" : "secondary"}>
-                        {r.status === "active" ? "Active" : "Deactive"}
-                      </Badge>
-                </TableCell>
-                <TableCell>{new Date(r.createdAt).toLocaleString()}</TableCell>
-                <TableCell>{new Date(r.updatedAt).toLocaleString()}</TableCell>
-                <TableCell>{r.updatedBy}</TableCell>
-                <TableCell className="text-center">
-                  <Button  className="h-6 w-20 justify-center px-0"
-                    size="sm"
-                    variant={r.status === "active" ? "destructive" : "default"}
-                    onClick={() => toggleStatus(r.id)}
-                  >
-                    {r.status === "active" ? "Deactivate" : "Activate"}
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <DataTable columns={columns} data={currentRows} />
       </div>
 
       <PaginationBar
