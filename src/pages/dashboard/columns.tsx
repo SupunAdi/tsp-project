@@ -109,7 +109,7 @@ export function createColumns(opts: { onToggleStatus: (id: string) => void }): C
     {
       id: "binSize",
       header: () => <div className="text-center">BIN Size</div>,
-      // compute from tokenBin (digits length), matching your modal logic
+      // compute from tokenBin (digits length)
       cell: ({ row }) => {
         const t: string = row.original.tokenBin || ""
         return <div className="text-center">{t.replace(/\D/g, "").length}</div>
