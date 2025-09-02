@@ -2,220 +2,246 @@ import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Card } from "@/components/ui/card"
+import { DataTable } from "@/components/ui/data-table"
 import PaginationBar from "@/components/pagination-bar"
 import { usePagination } from "@/hooks/use-pagination"
-import { CreditCard, CheckCircle2, XCircle, Clock } from "lucide-react"
+import { createColumns, INITIAL_ROWS, type AuditLogRecord, USER_ROLES, PAGES, TASKS, USERS } from "./columns"
 
-import { DataTable } from "@/components/ui/data-table"
+import { Search } from "lucide-react"
 
-import type { TokenBinRecord } from "./columns"
-import { createColumns, INITIAL_ROWS, CARD_ASSOCIATIONS, BANK_CODES } from "./columns"
+import { startOfDay, endOfDay } from "date-fns"
+import type { DateRange } from "react-day-picker"
+import { DateRangePicker } from "@/components/date-range"
 
-export default function TokenBills() {
-  const [rows, setRows] = useState<TokenBinRecord[]>(INITIAL_ROWS)
+export default function Report() {
+  // full dataset
+  const [rows] = useState<AuditLogRecord[]>(INITIAL_ROWS)
 
-  // modal state
-  const [open, setOpen] = useState(false)
-  const [form, setForm] = useState<{
-    bin: string
-    cardAssociation: TokenBinRecord["cardAssociation"]
-    bankCode: string
-  }>({
-    bin: "",
-    cardAssociation: CARD_ASSOCIATIONS[0],
-    bankCode: BANK_CODES[0],
+    const [filters, setFilters] = useState({
+    userRole: "",
+    description: "",
+    userName: "",
+    remarks: "",
+    page: "",
+    task: "",
+    ip: "",
+    quick: "",
   })
 
-  const binSize = form.bin.replace(/\D/g, "").length
+  const [dateRange, setDateRange] = useState<DateRange | undefined>()
 
-  const { page, setPage, pageSize, setPageSize, pageCount, range } = usePagination(rows.length, 5)
+
+  // derived: filtered rows
+   const filtered = useMemo(() => {
+    const inRange = (iso: string) => {
+      if (!dateRange?.from && !dateRange?.to) return true
+      const t = new Date(iso).getTime()
+      const from = dateRange?.from ? startOfDay(dateRange.from).getTime() : -Infinity
+      const to   = dateRange?.to   ?   endOfDay(dateRange.to).getTime()   :  Infinity
+      return t >= from && t <= to
+    }
+
+    const q = filters.quick.toLowerCase().trim()
+
+    return rows.filter((r) => {
+      const roleOk = !filters.userRole || r.userRole === filters.userRole
+      const nameOk = !filters.userName || r.userName === filters.userName
+      const pageOk = !filters.page || r.page === filters.page
+      const taskOk = !filters.task || r.task === filters.task
+      const descOk = !filters.description || r.description.toLowerCase().includes(filters.description.toLowerCase())
+      const remOk = !filters.remarks || (r.remarks ?? "").toLowerCase().includes(filters.remarks.toLowerCase())
+      const dateOk = inRange(r.createdAt)
+
+      // quick search hits any visible cell
+      const quickOk =
+        !q ||
+        [r.userRole, r.description, r.page, r.task, r.userName,  new Date(r.createdAt).toLocaleString()]
+          .join(" ")
+          .toLowerCase()
+          .includes(q)
+
+      return roleOk && nameOk && pageOk && taskOk  && descOk && remOk && dateOk && quickOk
+    })
+  }, [rows, filters])
+
+  // pagination
+  const { page, setPage, pageSize, setPageSize, pageCount, range } = usePagination(filtered.length, 5)
   const startIdx = (page - 1) * pageSize
   const endIdx = startIdx + pageSize
-  const currentRows = useMemo(() => rows.slice(startIdx, endIdx), [rows, startIdx, endIdx])
+  const currentRows = useMemo(() => filtered.slice(startIdx, endIdx), [filtered, startIdx, endIdx])
 
-  // status toggle 
-  const toggleStatus = (id: string) =>
-    setRows((prev) =>
-      prev.map((r) =>
-        r.id === id
-          ? {
-              ...r,
-              status: r.status === "active" ? "deactive" : "active",
-              updatedAt: new Date().toISOString(),
-              updatedBy: "Demo User",
-            }
-          : r
-      )
-    )
+  const columns = useMemo(() => createColumns(), [])
 
-  const handleSave = () => {
-    console.log("Saving (stub):", {
-      tokenBin: form.bin.replace(/\D/g, ""),
-      cardAssociation: form.cardAssociation,
-      bankCode: form.bankCode,
-      binSize,
+  const onSearchClick = () => setPage(1)
+  const onClear = () =>
+    setFilters({
+      userRole: "",
+      description: "",
+      userName: "",
+      remarks: "",
+      page: "",
+      task: "",
+      from: "",
+      to: "",
+      quick: "",
     })
-    setOpen(false)
-  }
-
-  const columns = useMemo(() => createColumns({ onToggleStatus: toggleStatus }), [])
 
   return (
     <div className="space-y-4">
+      {/* Header */}
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold">Reporting</h1>
         </div>
       </div>
 
-      {/* KPI Cards  */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <CreditCard className="h-4 w-4" />
-              Total BINs
-            </CardTitle>
-            <CardDescription>All configured BINs</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-semibold">—</div>
-          </CardContent>
-        </Card>
+      {/* Filters Card */}
+      <Card className="p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="font-medium">Audit Traces <span className="ml-2 rounded-full bg-muted px-2 py-[2px] text-xs">{filtered.length}</span></div>
+          <div className="flex items-center gap-2">
+            <Input
+              placeholder="Search"
+              value={filters.quick}
+              onChange={(e) => setFilters((f) => ({ ...f, quick: e.target.value }))}
+              className="w-[280px]"
+            />
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4" />
-              Active
-            </CardTitle>
-            <CardDescription>Currently enabled</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-semibold">—</div>
-          </CardContent>
-        </Card>
+        {/* Filters grid */}
+        <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-4">
+          {/* User Role */}
+          <div>
+            <Label className="sr-only">Select User Role</Label>
+            <Select
+              value={filters.userRole}
+              onValueChange={(v) => setFilters((f) => ({ ...f, userRole: v }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select User Role" />
+              </SelectTrigger>
+              <SelectContent>
+                {USER_ROLES.map((r) => (
+                  <SelectItem key={r} value={r}>{r}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <XCircle className="h-4 w-4" />
-              Deactive
-            </CardTitle>
-            <CardDescription>Currently disabled</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-semibold">—</div>
-          </CardContent>
-        </Card>
+          {/* Description */}
+          <div>
+            <Input
+              placeholder="Enter Description"
+              value={filters.description}
+              onChange={(e) => setFilters((f) => ({ ...f, description: e.target.value }))}
+            />
+          </div>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              Last Updated
-            </CardTitle>
-            <CardDescription>Most recent change</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-semibold">—</div>
-          </CardContent>
-        </Card>
-      </div>
+          {/* User Name */}
+          <div>
+            <Select
+              value={filters.userName}
+              onValueChange={(v) => setFilters((f) => ({ ...f, userName: v }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select User Name" />
+              </SelectTrigger>
+              <SelectContent>
+                {USERS.map((u) => (
+                  <SelectItem key={u} value={u}>{u}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-      {/* Add New Modal  */}
-      <div className="flex justify-end w-full -mt-1 mb-2">
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button className="sm:ml-auto">Add New Card Bin</Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Add New Card BIN</DialogTitle>
-              <DialogDescription>Fill details and click Save. This is a frontend preview only.</DialogDescription>
-            </DialogHeader>
+          {/* Remarks */}
+          <div>
+            <Input
+              placeholder="Enter Remarks"
+              value={filters.remarks}
+              onChange={(e) => setFilters((f) => ({ ...f, remarks: e.target.value }))}
+            />
+          </div>
 
-            <div className="grid gap-4 py-2">
-              {/* Bin number */}
-              <div className="grid gap-2">
-                <Label htmlFor="bin">BIN Number</Label>
-                <Input
-                  id="bin"
-                  inputMode="numeric"
-                  placeholder="Enter digits only"
-                  value={form.bin}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, bin: e.target.value.replace(/\D/g, "") }))
-                  }
-                />
-              </div>
+          {/* Page */}
+          <div>
+            <Select
+              value={filters.page}
+              onValueChange={(v) => setFilters((f) => ({ ...f, page: v }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select Page" />
+              </SelectTrigger>
+              <SelectContent>
+                {PAGES.map((p) => (
+                  <SelectItem key={p} value={p}>{p}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-              {/* Card Association */}
-              <div className="grid gap-2">
-                <Label>Card Association</Label>
-                <Select
-                  value={form.cardAssociation}
-                  onValueChange={(val) =>
-                    setForm((f) => ({ ...f, cardAssociation: val as TokenBinRecord["cardAssociation"] }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CARD_ASSOCIATIONS.map((opt) => (
-                      <SelectItem key={opt} value={opt}>
-                        {opt}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+          {/* Task */}
+          <div>
+            <Select
+              value={filters.task}
+              onValueChange={(v) => setFilters((f) => ({ ...f, task: v }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select Task" />
+              </SelectTrigger>
+              <SelectContent>
+                {TASKS.map((t) => (
+                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+         
+          {/* Date Range */}
+          <div className="flex gap-2">
+            <Input
+              type="date"
+              value={filters.from}
+              onChange={(e) => setFilters((f) => ({ ...f, from: e.target.value }))}
+              className="w-full"
+              placeholder="From"
+            />
+            <Input
+              type="date"
+              value={filters.to}
+              onChange={(e) => setFilters((f) => ({ ...f, to: e.target.value }))}
+              className="w-full"
+              placeholder="To"
+            />
+          </div>
+        </div>
 
-              {/* BIN Size (auto) */}
-              <div className="grid gap-2">
-                <Label htmlFor="binsize">BIN Size</Label>
-                <Input id="binsize" value={binSize} readOnly />
-              </div>
+        {/* Actions */}
+        <div className="mt-4 flex items-center gap-2">
+          <Button onClick={onSearchClick} className="gap-2">
+            <Search className="h-4 w-4" /> Search
+          </Button>
+          <Button variant="outline" onClick={onClear}>Clear</Button>
+        </div>
+      </Card>
 
-              {/* Bank Code */}
-              <div className="grid gap-2">
-                <Label>Bank Code</Label>
-                <Select
-                  value={form.bankCode}
-                  onValueChange={(val) => setForm((f) => ({ ...f, bankCode: val }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {BANK_CODES.map((code) => (
-                      <SelectItem key={code} value={code}>
-                        {code}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <DialogFooter>
-              <Button onClick={handleSave}>Save</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* DataTable using tanstack/react-table */}
+      {/* Table */}
       <div className="rounded-md border">
         <DataTable columns={columns} data={currentRows} />
       </div>
 
+      {/* Footer controls: page size + go to page are already in your PaginationBar */}
       <PaginationBar
-        total={rows.length}
+        total={filtered.length}
         page={page}
         pageSize={pageSize}
         pageCount={pageCount}

@@ -3,8 +3,10 @@ import { cn } from "@/lib/utils"
 
 export default function TokenBinManagementLayout() {
   const tabs = [
-    { to: "/token-bills/card-bins", label: "Card BINs" },
-    { to: "/token-bills/account-bins", label: "Account BINs" },
+    { to: "/token-bins/card-bins", label: "Card BINs" },
+    { to: "/token-bins/account-bins", label: "Account BINs" },
+    // { to: "/token-bills/card-bins", label: "Card BINs" },
+    // { to: "/token-bills/account-bins", label: "Account BINs" },
   ]
 
   return (

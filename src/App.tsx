@@ -5,15 +5,15 @@ import TokenBinManagementLayout from "@/pages/TokenBinManagement"
 import CardBinManagement from "./pages/TokenBinManagement/CardBinManagement/CardBinManagement"
 import AccountBinManagement from "@/pages/TokenBinManagement/AccountBinManagement/AccountBinManagement"
 
-import { Dashboard } from "./pages"
-import { Instances } from "./pages"
+// import { Dashboard } from "./pages"
+import { Dashboard, Instances } from "./pages"
 import { Profile } from "./pages"
 import { Reports } from "./pages"
 import { Tokens } from "./pages"
 
 import Login from "@/pages/Login"
 
-// Settings (frontend-only)
+// Settings
 import SettingsProfile from "@/pages/settings/profile"
 import Password from "@/pages/settings/password"
 import Appearance from "@/pages/settings/appearance"
@@ -27,8 +27,8 @@ export default function App() {
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<Dashboard />} />
 
-        {/* Token Bill Management with tabs */}
-        <Route path="/token-bills/*" element={<TokenBinManagementLayout />}>
+        {/* Token Bin Management with tabs */}
+        <Route path="/token-bins/*" element={<TokenBinManagementLayout />}>
           <Route index element={<Navigate to="card-bins" replace />} />
           <Route path="card-bins" element={<CardBinManagement />} />
           <Route path="account-bins" element={<AccountBinManagement />} />
@@ -48,3 +48,5 @@ export default function App() {
     </Routes>
   )
 }
+
+//i think the login is connect when use browse route

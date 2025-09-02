@@ -18,7 +18,7 @@ import AppLogo from "./app-logo";
 const mainNavItems: NavItem[] = [
   // { title: "Users", href: "/users", icon: UserIcon },
   { title: "Dashboard",            href: "/dashboard",   icon: LayoutGrid },
-  { title: "Token Bill Management",href: "/token-bills", icon: ReceiptText },
+  { title: "Token Bin Management",href: "/token-bins", icon: ReceiptText },
   { title: "Profile Management",   href: "/profile",     icon: UserCog },
   { title: "Instance Management",  href: "/instances",   icon: Server },
   { title: "Token Management",     href: "/tokens",      icon: Coins },

@@ -1,208 +1,165 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {DropdownMenu,
+import { Badge } from "@/components/ui/badge"
+import {
+  DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, ArrowUp, ArrowDown } from "lucide-react"
+import { MoreHorizontal, ArrowUp, ArrowDown, Eye } from "lucide-react"
 
-export type TokenBinRecord = {
+export type AuditLogRecord = {
   id: string
-  tokenBin: string
-  cardAssociation: "Visa" | "Mastercard" | "Amex" | "Discover" | "JCB" | "UnionPay"
-  bankCode: string
-  status: "active" | "deactive"
-  createdAt: string
-  updatedAt: string
-  updatedBy: string
+  userRole: "ADMIN" | "OPERATOR" | "AUDITOR" | "MERCHANT"
+  description: string
+  page: string
+  task: "Login" | "Access and load page" | "Create" | "Update" | "Delete"
+  userName: string
+  
+  createdAt: string // ISO
+  remarks?: string
+  status?: "Success" | "Failed"
 }
 
-const NOW = new Date()
-const fmt = (d: Date) => new Date(d).toISOString()
+// Sample option lists for filters
+export const USER_ROLES: AuditLogRecord["userRole"][] = ["ADMIN", "OPERATOR", "AUDITOR", "MERCHANT"]
+export const PAGES = [
+  "DEFAULT",
+  "Token Bin Management",
+  "Profile Management",
+  "instance",
+  "Token Management",
+]
+export const TASKS: AuditLogRecord["task"][] = ["Login", "Access and load page", "Create", "Update", "Delete"]
+export const USERS = ["gihan", "wije", "kevin", "nuwan", "demo_user"]
 
-export const INITIAL_ROWS: TokenBinRecord[] = [
-  { id: "1",  tokenBin: "412345", cardAssociation: "Visa",       bankCode: "BNK00123", status: "active",  createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Alice" },
-  { id: "2",  tokenBin: "512345", cardAssociation: "Mastercard", bankCode: "CBA45",   status: "deactive",createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Bob"   },
-  { id: "3",  tokenBin: "622222", cardAssociation: "UnionPay",   bankCode: "UP9988",  status: "active",  createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Cara"  },
-  { id: "4",  tokenBin: "371111", cardAssociation: "Amex",       bankCode: "AMX77",   status: "active",  createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Dana"  },
-  { id: "5",  tokenBin: "601155", cardAssociation: "Discover",   bankCode: "DISC001", status: "deactive",createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Evan"  },
-  { id: "6",  tokenBin: "352800", cardAssociation: "JCB",        bankCode: "JCB12",   status: "active",  createdAt: fmt(new Date(+NOW-9e7)), updatedAt: fmt(new Date(+NOW-5e7)), updatedBy: "Alex"  },
-  { id: "7",  tokenBin: "455667", cardAssociation: "Visa",       bankCode: "V45",     status: "active",  createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Mia"   },
-  { id: "8",  tokenBin: "545454", cardAssociation: "Mastercard", bankCode: "MC0099",  status: "deactive",createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Noah"  },
-  { id: "9",  tokenBin: "378282", cardAssociation: "Amex",       bankCode: "AM3X",    status: "active",  createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Ivy"   },
-  { id: "10", tokenBin: "601100", cardAssociation: "Discover",   bankCode: "D1",      status: "active",  createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Omar"  },
-  { id: "11", tokenBin: "353011", cardAssociation: "JCB",        bankCode: "JCB0007", status: "deactive",createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Rae"   },
-  { id: "12", tokenBin: "400000", cardAssociation: "Visa",       bankCode: "BANKX",   status: "active",  createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Leo"   },
+// helper
+const iso = (d: Date | number) => new Date(d).toISOString()
+
+// Sample data (feel free to expand/replace)
+export const INITIAL_ROWS: AuditLogRecord[] = [
+  {
+    id: "1",
+    userRole: "ADMIN",
+    description: " View Token Bin Management",
+    page: "Token Bin Management",
+    task: "Access and load page",
+    userName: "gihan",
+    createdAt: iso(Date.now() - 20_000),
+    status: "Success",
+  },
+  {
+    id: "2",
+    userRole: "AUDITOR",
+    description: "Login successfully",
+    page: "DEFAULT",
+    task: "Login",
+    userName: "wije",
+    createdAt: iso(Date.now() - 30_000),
+    status: "Success",
+  },
+  {
+    id: "3",
+    userRole: "ADMIN",
+    description: "Login successfully",
+    page: "DEFAULT",
+    task: "Login",
+    userName: "kevin",
+    createdAt: iso(Date.now() - 60_000),
+    status: "Success",
+  },
+  {
+    id: "4",
+    userRole: "AUDITOR",
+    description: "View Profile Management",
+    page: "Profile Management",
+    task: "Access and load page",
+    userName: "damith",
+    createdAt: iso(Date.now() - 90_000),
+    status: "Success",
+  },
+  {
+    id: "5",
+    userRole: "ADMIN",
+    description: "View instance page",
+    page: "instance",
+    task: "Access and load page",
+    userName: "gayesh",
+    createdAt: iso(Date.now() - 110_000),
+    status: "Success",
+  },
 ]
 
-// dropdown/select options
-export const CARD_ASSOCIATIONS: TokenBinRecord["cardAssociation"][] = [
-  "Visa", "Mastercard", "Amex", "Discover", "JCB", "UnionPay",
-]
-export const BANK_CODES = [
-  "BNK00123", "CBA45", "UP9988", "AMX77", "DISC001", "JCB12",
-  "V45", "MC0099", "AM3X", "D1", "JCB0007", "BANKX",
-]
-
-export function createColumns(opts: { onToggleStatus: (id: string) => void }): ColumnDef<TokenBinRecord>[] {
-  const { onToggleStatus } = opts
-
+// columns
+export function createColumns(): ColumnDef<AuditLogRecord>[] {
   return [
     {
-      accessorKey: "tokenBin",
+      accessorKey: "userRole",
       header: ({ column }) => (
-        <div className="text-center">
+        <div className="text-left pl-2">
           <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-            Token BIN
-            {column.getIsSorted() === "asc" ? (
-              <ArrowUp className="ml-2 h-4 w-4" />
-            ) : column.getIsSorted() === "desc" ? (
-              <ArrowDown className="ml-2 h-4 w-4" />
-            ) : null}
+            User Role
+            {column.getIsSorted() === "asc" ? <ArrowUp className="ml-2 h-4 w-4" /> : column.getIsSorted() === "desc" ? <ArrowDown className="ml-2 h-4 w-4" /> : null}
           </Button>
         </div>
       ),
-      cell: ({ row }) => <div className="text-center">{row.getValue("tokenBin")}</div>,
-      enableSorting: true,
-      enableHiding: true,
+      cell: ({ row }) => <div className="pl-2">{row.original.userRole}</div>,
     },
     {
-      accessorKey: "cardAssociation",
+      accessorKey: "description",
+      header: "Description",
+      cell: ({ row }) => <div>{row.original.description}</div>,
+    },
+    {
+      accessorKey: "page",
       header: ({ column }) => (
-        <div className="text-center">
+        <div className="text-left">
           <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-            Card Association
-            {column.getIsSorted() === "asc" ? (
-              <ArrowUp className="ml-2 h-4 w-4" />
-            ) : column.getIsSorted() === "desc" ? (
-              <ArrowDown className="ml-2 h-4 w-4" />
-            ) : null}
+            Page
+            {column.getIsSorted() === "asc" ? <ArrowUp className="ml-2 h-4 w-4" /> : column.getIsSorted() === "desc" ? <ArrowDown className="ml-2 h-4 w-4" /> : null}
           </Button>
         </div>
       ),
-      cell: ({ row }) => <div className="text-center">{row.getValue("cardAssociation")}</div>,
-      enableSorting: true,
-      enableHiding: true,
+      cell: ({ row }) => <div>{row.original.page}</div>,
     },
     {
-      accessorKey: "bankCode",
-      header: ({ column }) => (
-        <div className="text-center">
-          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-            Bank Code
-            {column.getIsSorted() === "asc" ? (
-              <ArrowUp className="ml-2 h-4 w-4" />
-            ) : column.getIsSorted() === "desc" ? (
-              <ArrowDown className="ml-2 h-4 w-4" />
-            ) : null}
-          </Button>
-        </div>
-      ),
-      cell: ({ row }) => <div className="text-center tabular-nums">{row.getValue("bankCode")}</div>,
-      enableSorting: true,
-      enableHiding: true,
+      accessorKey: "task",
+      header: "Task",
+      cell: ({ row }) => <div>{row.original.task}</div>,
     },
     {
-      id: "binSize",
-      header: () => <div className="text-center">BIN Size</div>,
-      // compute from tokenBin (digits length), matching your modal logic
-      cell: ({ row }) => {
-        const t: string = row.original.tokenBin || ""
-        return <div className="text-center">{t.replace(/\D/g, "").length}</div>
-      },
-      enableSorting: false,
-      enableHiding: true,
+      accessorKey: "userName",
+      header: "User Name",
+      cell: ({ row }) => <div>{row.original.userName}</div>,
     },
-   {
-  accessorKey: "status",
-  header: ({ column }) => (
-    <div className="text-center">
-      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-        Status
-        {column.getIsSorted() === "asc" ? (
-          <ArrowUp className="ml-2 h-4 w-4" />
-        ) : column.getIsSorted() === "desc" ? (
-          <ArrowDown className="ml-2 h-4 w-4" />
-        ) : null}
-      </Button>
-    </div>
-  ),
-  cell: ({ row }) => {
-    const status = row.original.status
-    return (
-      <div className="text-center">
-        <Badge variant={status === "active" ? "default" : "secondary"}>
-          {status === "active" ? "Active" : "Deactive"}
-        </Badge>
-      </div>
-    )
-  },
-  enableSorting: true,
-  enableHiding: true,
-},
+   
     {
       accessorKey: "createdAt",
       header: ({ column }) => (
-        <div className="text-center">
+        <div className="text-left">
           <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-            Create time
-            {column.getIsSorted() === "asc" ? (
-              <ArrowUp className="ml-2 h-4 w-4" />
-            ) : column.getIsSorted() === "desc" ? (
-              <ArrowDown className="ml-2 h-4 w-4" />
-            ) : null}
+            Created Time
+            {column.getIsSorted() === "asc" ? <ArrowUp className="ml-2 h-4 w-4" /> : column.getIsSorted() === "desc" ? <ArrowDown className="ml-2 h-4 w-4" /> : null}
           </Button>
         </div>
       ),
-      cell: ({ row }) => <div className="text-center">{new Date(row.original.createdAt).toLocaleString()}</div>,
-      enableSorting: true,
+      cell: ({ row }) => <div>{new Date(row.original.createdAt).toLocaleString()}</div>,
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => {
+        const s = row.original.status ?? "Success"
+        return <Badge variant={s === "Success" ? "default" : "destructive"}>{s}</Badge>
+      },
       enableHiding: true,
     },
     {
-      accessorKey: "updatedAt",
-      header: ({ column }) => (
-        <div className="text-center">
-          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-            Update time
-            {column.getIsSorted() === "asc" ? (
-              <ArrowUp className="ml-2 h-4 w-4" />
-            ) : column.getIsSorted() === "desc" ? (
-              <ArrowDown className="ml-2 h-4 w-4" />
-            ) : null}
-          </Button>
-        </div>
-      ),
-      cell: ({ row }) => <div className="text-center">{new Date(row.original.updatedAt).toLocaleString()}</div>,
-      enableSorting: true,
-      enableHiding: true,
-    },
-    {
-  accessorKey: "updatedBy",
-  header: ({ column }) => (
-    <div className="text-center">
-      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-        Last update user
-        {column.getIsSorted() === "asc" ? (
-          <ArrowUp className="ml-2 h-4 w-4" />
-        ) : column.getIsSorted() === "desc" ? (
-          <ArrowDown className="ml-2 h-4 w-4" />
-        ) : null}
-      </Button>
-    </div>
-  ),
-  cell: ({ row }) => (
-    <div className="text-center">{row.getValue("updatedBy")}</div>
-  ),
-  enableSorting: true,
-  enableHiding: true,
-},
-    {
-      id: "actions",
-      header: () => <div className="text-center">Action</div>,
+      id: "action",
+      header: "Action",
       cell: ({ row }) => {
         const rec = row.original
         return (
@@ -210,35 +167,23 @@ export function createColumns(opts: { onToggleStatus: (id: string) => void }): C
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
-                  <span className="sr-only">Open menu</span>
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-
-                <DropdownMenuItem onClick={() => onToggleStatus(rec.id)}>
-                  {rec.status === "active" ? "Deactivate" : "Activate"}
+                <DropdownMenuItem onClick={() => alert(`View trace ${rec.id}`)}>
+                  <Eye className="mr-2 h-4 w-4" /> View
                 </DropdownMenuItem>
-
                 <DropdownMenuSeparator />
-
-                <DropdownMenuItem onClick={() => alert(`Editing BIN ${rec.tokenBin}`)}>
-                  Edit
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => alert(`Deleting BIN ${rec.tokenBin}`)}>
-                  Delete
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => alert(`Viewing BIN ${rec.tokenBin}`)}>
-                  View
-                </DropdownMenuItem>
+                {/* <DropdownMenuItem onClick={() => alert(`Filter by IP ${rec.ip}`)}>Filter by IP</DropdownMenuItem> */}
+                <DropdownMenuItem onClick={() => alert(`Filter by user ${rec.userName}`)}>Filter by User</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         )
       },
-      enableSorting: false,
-      enableHiding: true,
     },
+    
   ]
 }
