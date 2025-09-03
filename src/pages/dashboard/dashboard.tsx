@@ -1,11 +1,10 @@
-import { useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {CreditCard, User2,  Server, ShieldCheck, Activity, ArrowUpRight, ArrowDownRight, Clock, FileChartColumn, RefreshCw, Database, Users, Shield, Settings2,
+import {CreditCard, User2,  Server, ShieldCheck, Activity, ArrowUpRight, ArrowDownRight, Clock, FileChartColumn, RefreshCw, Users, Shield, Settings2,
 } from "lucide-react"
 
 // Dummy Data 
@@ -110,8 +109,6 @@ function StatusBadge({
 export default function Dashboard() {
   // Derived figures (dummy math)
  
- 
-
   const activeUsers = profileUsers.filter(u => u.status === "Active").length
   const healthyInstances = instances.filter(i => i.status === "Healthy").length
   const degradedInstances = instances.filter(i => i.status === "Degraded").length

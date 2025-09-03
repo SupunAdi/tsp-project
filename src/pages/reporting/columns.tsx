@@ -18,28 +18,28 @@ export type AuditLogRecord = {
   page: string
   task: "Login" | "Access and load page" | "Create" | "Update" | "Delete"
   userName: string
-  
-  createdAt: string // ISO
+  createdAt: string 
   remarks?: string
   status?: "Success" | "Failed"
 }
 
-// Sample option lists for filters
-export const USER_ROLES: AuditLogRecord["userRole"][] = ["ADMIN", "OPERATOR", "AUDITOR", "MERCHANT"]
+export const USER_ROLES: AuditLogRecord["userRole"][] = [
+  "ADMIN", "OPERATOR", "AUDITOR", "MERCHANT",
+]
 export const PAGES = [
-  "DEFAULT",
+  "Login",
   "Token Bin Management",
   "Profile Management",
   "instance",
   "Token Management",
 ]
-export const TASKS: AuditLogRecord["task"][] = ["Login", "Access and load page", "Create", "Update", "Delete"]
+export const TASKS: AuditLogRecord["task"][] = [
+  "Login", "Access and load page", "Create", "Update", "Delete",
+]
 export const USERS = ["gihan", "wije", "kevin", "nuwan", "demo_user"]
 
-// helper
 const iso = (d: Date | number) => new Date(d).toISOString()
 
-// Sample data (feel free to expand/replace)
 export const INITIAL_ROWS: AuditLogRecord[] = [
   {
     id: "1",
@@ -55,7 +55,7 @@ export const INITIAL_ROWS: AuditLogRecord[] = [
     id: "2",
     userRole: "AUDITOR",
     description: "Login successfully",
-    page: "DEFAULT",
+    page: "Login",
     task: "Login",
     userName: "wije",
     createdAt: iso(Date.now() - 30_000),
@@ -65,11 +65,11 @@ export const INITIAL_ROWS: AuditLogRecord[] = [
     id: "3",
     userRole: "ADMIN",
     description: "Login successfully",
-    page: "DEFAULT",
+    page: "Login",
     task: "Login",
     userName: "kevin",
     createdAt: iso(Date.now() - 60_000),
-    status: "Success",
+    status: "Failed",
   },
   {
     id: "4",
@@ -89,12 +89,26 @@ export const INITIAL_ROWS: AuditLogRecord[] = [
     task: "Access and load page",
     userName: "gayesh",
     createdAt: iso(Date.now() - 110_000),
-    status: "Success",
+    status: "Failed",
   },
 ]
 
-// columns
-export function createColumns(): ColumnDef<AuditLogRecord>[] {
+// opens the dialog from Report
+export function createColumns(
+  onView?: (row: AuditLogRecord) => void
+): ColumnDef<AuditLogRecord>[] {
+  const Clickable: React.FC<{ onClick: () => void; children: React.ReactNode }> = ({ onClick, children }) => (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onClick() }}
+      className="cursor-pointer rounded px-2 py-1 hover:bg-muted/50"
+    >
+      {children}
+    </div>
+  )
+
   return [
     {
       accessorKey: "userRole",
@@ -102,16 +116,25 @@ export function createColumns(): ColumnDef<AuditLogRecord>[] {
         <div className="text-left pl-2">
           <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
             User Role
-            {column.getIsSorted() === "asc" ? <ArrowUp className="ml-2 h-4 w-4" /> : column.getIsSorted() === "desc" ? <ArrowDown className="ml-2 h-4 w-4" /> : null}
+            {column.getIsSorted() === "asc" ? <ArrowUp className="ml-2 h-4 w-4" /> :
+             column.getIsSorted() === "desc" ? <ArrowDown className="ml-2 h-4 w-4" /> : null}
           </Button>
         </div>
       ),
-      cell: ({ row }) => <div className="pl-2">{row.original.userRole}</div>,
+      cell: ({ row }) => (
+        <Clickable onClick={() => onView?.(row.original)}>
+          <div className="pl-0">{row.original.userRole}</div>
+        </Clickable>
+      ),
     },
     {
       accessorKey: "description",
       header: "Description",
-      cell: ({ row }) => <div>{row.original.description}</div>,
+      cell: ({ row }) => (
+        <Clickable onClick={() => onView?.(row.original)}>
+          {row.original.description}
+        </Clickable>
+      ),
     },
     {
       accessorKey: "page",
@@ -119,41 +142,62 @@ export function createColumns(): ColumnDef<AuditLogRecord>[] {
         <div className="text-left">
           <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
             Page
-            {column.getIsSorted() === "asc" ? <ArrowUp className="ml-2 h-4 w-4" /> : column.getIsSorted() === "desc" ? <ArrowDown className="ml-2 h-4 w-4" /> : null}
+            {column.getIsSorted() === "asc" ? <ArrowUp className="ml-2 h-4 w-4" /> :
+             column.getIsSorted() === "desc" ? <ArrowDown className="ml-2 h-4 w-4" /> : null}
           </Button>
         </div>
       ),
-      cell: ({ row }) => <div>{row.original.page}</div>,
+      cell: ({ row }) => (
+        <Clickable onClick={() => onView?.(row.original)}>
+          {row.original.page}
+        </Clickable>
+      ),
     },
     {
       accessorKey: "task",
       header: "Task",
-      cell: ({ row }) => <div>{row.original.task}</div>,
+      cell: ({ row }) => (
+        <Clickable onClick={() => onView?.(row.original)}>
+          {row.original.task}
+        </Clickable>
+      ),
     },
     {
       accessorKey: "userName",
       header: "User Name",
-      cell: ({ row }) => <div>{row.original.userName}</div>,
+      cell: ({ row }) => (
+        <Clickable onClick={() => onView?.(row.original)}>
+          {row.original.userName}
+        </Clickable>
+      ),
     },
-   
     {
       accessorKey: "createdAt",
       header: ({ column }) => (
         <div className="text-left">
           <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
             Created Time
-            {column.getIsSorted() === "asc" ? <ArrowUp className="ml-2 h-4 w-4" /> : column.getIsSorted() === "desc" ? <ArrowDown className="ml-2 h-4 w-4" /> : null}
+            {column.getIsSorted() === "asc" ? <ArrowUp className="ml-2 h-4 w-4" /> :
+             column.getIsSorted() === "desc" ? <ArrowDown className="ml-2 h-4 w-4" /> : null}
           </Button>
         </div>
       ),
-      cell: ({ row }) => <div>{new Date(row.original.createdAt).toLocaleString()}</div>,
+      cell: ({ row }) => (
+        <Clickable onClick={() => onView?.(row.original)}>
+          {new Date(row.original.createdAt).toLocaleString()}
+        </Clickable>
+      ),
     },
     {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => {
         const s = row.original.status ?? "Success"
-        return <Badge variant={s === "Success" ? "default" : "destructive"}>{s}</Badge>
+        return (
+          <Clickable onClick={() => onView?.(row.original)}>
+            <Badge variant={s === "Success" ? "default" : "destructive"}>{s}</Badge>
+          </Clickable>
+        )
       },
       enableHiding: true,
     },
@@ -166,24 +210,30 @@ export function createColumns(): ColumnDef<AuditLogRecord>[] {
           <div className="text-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+                {/* prevent bubbling so row click won't fire */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 p-0"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => alert(`View trace ${rec.id}`)}>
+                <DropdownMenuItem onClick={() => onView?.(rec)}>
                   <Eye className="mr-2 h-4 w-4" /> View
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                {/* <DropdownMenuItem onClick={() => alert(`Filter by IP ${rec.ip}`)}>Filter by IP</DropdownMenuItem> */}
-                <DropdownMenuItem onClick={() => alert(`Filter by user ${rec.userName}`)}>Filter by User</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => alert(`Filter by user ${rec.userName}`)}>
+                  Filter by User
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         )
       },
     },
-    
   ]
 }
