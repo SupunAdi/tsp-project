@@ -72,14 +72,14 @@ export default function ShellWithSidebar() {
           <AppSidebarHeader breadcrumbs={breadcrumbs} />
 
           {/* Page content area */}
-          <main className="flex-1">
-            <div
-              className={`${APP_CONTAINER} py-6 flex flex-col`}
-              style={{ minHeight: `calc(100vh - ${APP_HEADER_HEIGHT}px)` }}
-            >
-              <Outlet />
-            </div>
-          </main>
+           <main className="flex-1 w-full overflow-x-hidden">
+              <div
+                className="w-full max-w-none px-6 py-6 flex flex-col"
+                style={{ minHeight: `calc(100vh - ${APP_HEADER_HEIGHT}px)` }}
+              >
+                <Outlet />
+              </div>
+            </main>
         </div>
       </div>
     </SidebarProvider>

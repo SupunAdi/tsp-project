@@ -211,12 +211,11 @@ export default function Dashboard() {
 
       {/* Detail Sections */}
       <Tabs defaultValue="token-bins" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full gap-2 grid-cols-1 md:grid-cols-2 lg:grid-cols-4 bg-transparent p-0 h-auto">
           <TabsTrigger value="token-bins">Token Bin Management</TabsTrigger>
           <TabsTrigger value="profiles">Profile Management</TabsTrigger>
           <TabsTrigger value="instances">Instance Management</TabsTrigger>
           <TabsTrigger value="tokens">Token Management</TabsTrigger>
-          <TabsTrigger value="reporting">Reporting</TabsTrigger>
         </TabsList>
 
         {/* 1) Token Bin Management */}
@@ -480,70 +479,6 @@ export default function Dashboard() {
                           <td className="py-2 pr-4 tabular-nums">{r.rev}</td>
                           <td className="py-2">
                             <Trend value={r.tr} />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        {/* 5) Reporting */}
-        <TabsContent value="reporting" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2"><FileChartColumn className="h-4 w-4" /> Quick Stats</CardTitle>
-                <CardDescription>Dummy metrics</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="rounded-lg border p-3">
-                  <div className="text-sm text-muted-foreground">Reports This Week</div>
-                  <div className="text-2xl font-semibold mt-1">14</div>
-                  <div className="mt-1"><Trend value={+4.6} /></div>
-                </div>
-                <div className="rounded-lg border p-3">
-                  <div className="text-sm text-muted-foreground">Average Gen Time</div>
-                  <div className="text-2xl font-semibold mt-1">1.8m</div>
-                  <div className="mt-1"><Trend value={-0.7} /></div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="md:col-span-2">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2"><Activity className="h-4 w-4" /> Recent Reports</CardTitle>
-                <CardDescription>Statuses & owners</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="text-left text-muted-foreground">
-                      <tr className="border-b">
-                        <th className="py-2 pr-4">Title</th>
-                        <th className="py-2 pr-4">Period</th>
-                        <th className="py-2 pr-4">Owner</th>
-                        <th className="py-2">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {reports.map(r => (
-                        <tr key={r.id} className="border-b last:border-none">
-                          <td className="py-2 pr-4 font-medium">{r.title}</td>
-                          <td className="py-2 pr-4">{r.period}</td>
-                          <td className="py-2 pr-4">{r.owner}</td>
-                          <td className="py-2">
-                            <StatusBadge
-                              v={r.status}
-                              map={{
-                                Generated: { label: "Generated", variant: "default" },
-                                Scheduled: { label: "Scheduled", variant: "secondary" },
-                                Draft: { label: "Draft", variant: "outline" },
-                              }}
-                            />
                           </td>
                         </tr>
                       ))}

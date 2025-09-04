@@ -16,11 +16,11 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
   const { pathname } = useLocation();
 
   return (
-    <div className="px-4 py-6">
+    <div className="px-4 py-6 ">
       <Heading title="Settings" description="Manage your profile and account settings" />
-      <div className="flex flex-col lg:flex-row lg:space-x-12">
-        <aside className="w-full max-w-xl lg:w-48">
-          <nav className="flex flex-col space-y-1 space-x-0">
+      <div className="lg:grid lg:grid-cols-[220px_1fr] lg:gap-12 flex flex-col gap-6 ">
+        <aside className="w-full lg:w-56">
+          <nav className="flex flex-col space-y-1 ">
             {sidebarNavItems.map((item, i) => (
               <Button
                 key={`${item.href}-${i}`}
@@ -35,9 +35,9 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
           </nav>
         </aside>
 
-        <Separator className="my-6 lg:hidden" />
+        <Separator className="lg:hidden" />
         <div className="flex-1 min-w-0 w-full">
-          <section className="max-w-xl space-y-12">{children}</section>
+          <section className="w-full max-w-none space-y-12">{children}</section>
         </div>
       </div>
     </div>
