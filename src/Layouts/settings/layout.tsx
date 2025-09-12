@@ -12,6 +12,13 @@ const sidebarNavItems: NavItem[] = [
   { title: "Appearance", href: "/settings/appearance", icon: null }
 ];
 
+// "/settings/password": [
+//   { title: "Dashboard", href: "/dashboard" },
+//   { title: "Settings", href: "/settings/profile" }, // keep consistent with others
+//   { title: "Password", href: "/settings/password" },
+// ],
+
+
 export default function SettingsLayout({ children }: PropsWithChildren) {
   const { pathname } = useLocation();
 

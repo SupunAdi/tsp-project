@@ -47,6 +47,7 @@ export default function ShellWithSidebar() {
       { title: "Dashboard", href: "/dashboard" },
       { title: "Reporting", href: "/reports" },
     ],
+    //settings
     "/settings/profile": [
       { title: "Dashboard", href: "/dashboard" },
       { title: "Settings", href: "/settings/profile" },
@@ -56,6 +57,11 @@ export default function ShellWithSidebar() {
       { title: "Dashboard", href: "/dashboard" },
       { title: "Settings", href: "/settings/appearance" },
       { title: "Appearance", href: "/settings/appearance" },
+    ],
+     "/settings/password": [
+      { title: "Dashboard", href: "/dashboard" },
+      { title: "Settings", href: "/settings/password" },
+      { title: "Password", href: "/settings/password" },
     ],
   }
 

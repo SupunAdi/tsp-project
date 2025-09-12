@@ -11,8 +11,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { CreditCard, CheckCircle2, XCircle, Clock, ArrowUp, ArrowDown, MoreHorizontal } from "lucide-react"
 import PaginationBar from "@/components/pagination-bar"
 import { usePagination } from "@/hooks/use-pagination"
-
-// import shared types/data/options from columns.tsx (logic unchanged)
 import {
   INITIAL_ROWS,
   CARD_ASSOCIATIONS,
