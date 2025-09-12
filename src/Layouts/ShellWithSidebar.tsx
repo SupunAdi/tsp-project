@@ -3,7 +3,7 @@ import { SidebarProvider } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { AppSidebarHeader } from "@/components/app-sidebar-header"
 import type { BreadcrumbItem, User as AppUser } from "@/types"
-import { APP_CONTAINER, APP_HEADER_HEIGHT } from "@/lib/layout"
+import { APP_HEADER_HEIGHT } from "@/lib/layout"
 
 const currentUser: AppUser = {
   id: 1,
@@ -63,7 +63,8 @@ export default function ShellWithSidebar() {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen bg-background">
+      {/* <div className="flex min-h-screen bg-background"> */}
+        <div className="flex min-h-svh w-full bg-background">
         <AppSidebar user={currentUser} />
 
         {/* Right column */}
@@ -74,8 +75,9 @@ export default function ShellWithSidebar() {
           {/* Page content area */}
            <main className="flex-1 w-full overflow-x-hidden">
               <div
-                className="w-full max-w-none px-6 py-6 flex flex-col"
-                style={{ minHeight: `calc(100vh - ${APP_HEADER_HEIGHT}px)` }}
+                // className="w-full  max-w-none px-6 py-6 flex flex-col"
+                className="w-full max-w-7xl mx-auto px-6 py-6 flex flex-col"
+                style={{ minHeight: `calc(100vh - ${APP_HEADER_HEIGHT}px)`, }}
               >
                 <Outlet />
               </div>

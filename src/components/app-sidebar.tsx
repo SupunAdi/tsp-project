@@ -11,20 +11,19 @@ import {
 } from "@/components/ui/sidebar";
 import type { NavItem, User as AppUser } from "@/types";
 import { Link } from "react-router-dom";
-import {  LayoutGrid, User as UserIcon,ReceiptText,UserCog,Server,Coins,BarChart3,
+import {  LayoutGrid, User as ReceiptText,UserCog,Server,Coins,BarChart3,
    } from "lucide-react";
 import AppLogo from "./app-logo";
 
 const mainNavItems: NavItem[] = [
-  // { title: "Users", href: "/users", icon: UserIcon },
+  // { title: "Users",  href: "/users", icon: UserIcon },
   { title: "Dashboard",            href: "/dashboard",   icon: LayoutGrid },
-  { title: "Token Bin Management",href: "/token-bins", icon: ReceiptText },
+  { title: "Token Bin Management", href: "/token-bins",  icon: ReceiptText },
   { title: "Profile Management",   href: "/profile",     icon: UserCog },
   { title: "Instance Management",  href: "/instances",   icon: Server },
   { title: "Token Management",     href: "/tokens",      icon: Coins },
   { title: "Reporting",            href: "/reports",     icon: BarChart3 }
 ];
-
 
 type AppSidebarProps = { user: AppUser }
 
@@ -48,7 +47,6 @@ export function AppSidebar({ user }: AppSidebarProps) {
       </SidebarContent>
 
       <SidebarFooter>
-        {/* <NavFooter items={footerNavItems} className="mt-auto" /> */}
         <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>

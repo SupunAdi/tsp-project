@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {CreditCard, User2,  Server, ShieldCheck, Activity, ArrowUpRight, ArrowDownRight, Clock, FileChartColumn, RefreshCw, Users, Shield, Settings2,
+import {CreditCard, User2,  Server, ShieldCheck, Activity, ArrowUpRight, ArrowDownRight, Clock, FileChartColumn, RefreshCw, Users, Shield, Settings2, Database,
 } from "lucide-react"
 
 // Dummy Data 
@@ -361,7 +361,7 @@ export default function Dashboard() {
         </TabsContent>
 
         {/* 3) Instance Management */}
-        {/* <TabsContent value="instances" className="space-y-4">
+        <TabsContent value="instances" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
             <Card className="md:col-span-2">
               <CardHeader className="pb-2">
@@ -422,7 +422,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           </div>
-        </TabsContent> */}
+        </TabsContent>
 
         {/* 4) Token Management */}
         <TabsContent value="tokens" className="space-y-4">

@@ -13,12 +13,7 @@ import PaginationBar from "@/components/pagination-bar"
 import { usePagination } from "@/hooks/use-pagination"
 
 // import shared types/data/options from columns.tsx
-import {
-  INITIAL_ROWS,
-  ASSOCIATIONS,
-  BANK_CODES as ACCOUNT_BANK_CODES,
-  type AccountBinRecord,
-} from "./columns"
+import {INITIAL_ROWS,ASSOCIATIONS,BANK_CODES as ACCOUNT_BANK_CODES, type AccountBinRecord,} from "./columns"
 
 export default function AccountBinManagement() {
   const [rows, setRows] = useState<AccountBinRecord[]>(INITIAL_ROWS)
@@ -310,9 +305,7 @@ export default function AccountBinManagement() {
                       <DropdownMenuItem onClick={() => toggleStatus(r.id)}>
                         {r.status === "active" ? "Deactivate" : "Activate"}
                       </DropdownMenuItem>
-
                       <DropdownMenuSeparator />
-
                       <DropdownMenuItem onClick={() => alert(`Editing ${r.accountBin}`)}>
                         Edit
                       </DropdownMenuItem>
