@@ -57,10 +57,10 @@ const tokenBins: TokenBin[] = [
 ]
 
 const profileUsers: ProfileUser[] = [
-  { id: "U-01", name: "Alice Martin",  email: "alice@demo.io",  role: "Admin",   status: "Active",    lastLogin: "2025-09-01 08:12" },
-  { id: "U-02", name: "Jason Clark",   email: "jason@demo.io",  role: "Manager", status: "Active",    lastLogin: "2025-09-01 10:02" },
-  { id: "U-03", name: "Mina Perera",   email: "mina@demo.io",   role: "Operator",status: "Suspended", lastLogin: "2025-08-29 16:55" },
-  { id: "U-04", name: "Rae Thompson",  email: "rae@demo.io",    role: "Auditor", status: "Active",    lastLogin: "2025-08-30 19:04" },
+  { id: "U-01", name: "kevin",  email: "kevin@demo.io",  role: "Admin",   status: "Active",    lastLogin: "2025-09-01 08:12" },
+  { id: "U-02", name: "wije",   email: "wije@demo.io",  role: "Manager", status: "Active",    lastLogin: "2025-09-01 10:02" },
+  { id: "U-03", name: "Milta",   email: "Milta@demo.io",   role: "Operator",status: "Suspended", lastLogin: "2025-08-29 16:55" },
+  { id: "U-04", name: "Kanchana",  email: "Kanchana@demo.io",    role: "Auditor", status: "Active",    lastLogin: "2025-08-30 19:04" },
 ]
 
 const instances: Instance[] = [

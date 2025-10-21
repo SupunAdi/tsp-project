@@ -5,11 +5,7 @@ import TokenBinManagementLayout from "@/pages/TokenBinManagement"
 import CardBinManagement from "./pages/TokenBinManagement/CardBinManagement/CardBinManagement"
 import AccountBinManagement from "@/pages/TokenBinManagement/AccountBinManagement/AccountBinManagement"
 
-// import { Dashboard } from "./pages"
-import { Dashboard, Instances } from "./pages"
-import { Profile } from "./pages"
-import { Reports } from "./pages"
-import { Tokens } from "./pages"
+import { Dashboard, Instances ,Profile ,Reports , Tokens } from "./pages"
 
 import Login from "@/pages/Login"
 
@@ -24,6 +20,7 @@ export default function App() {
       <Route path="/login" element={<Login />} />
 
       <Route element={<ShellWithSidebar />}>
+      
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<Dashboard />} />
 

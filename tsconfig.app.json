@@ -7,14 +7,7 @@
     "module": "ESNext",
     "skipLibCheck": true,
 
-    //    "baseUrl": ".",
-    // "paths": {
-    //   "@/*": [
-    //     "./src/*"
-    //   ]
-    // },
-
-        "baseUrl": ".",
+    "baseUrl": ".",
     "paths": { "@/*": ["./src/*"] },
 
     /* Bundler mode */
@@ -32,7 +25,7 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-   "types": ["vite/client"]  //after add
+    "types": ["vite/client"]  //after add
   },
   "include": ["src"]
 }

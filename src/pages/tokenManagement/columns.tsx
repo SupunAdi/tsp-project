@@ -25,13 +25,13 @@ const NOW = new Date()
 const fmt = (d: Date) => new Date(d).toISOString()
 
 export const INITIAL_ROWS: TokenBinRecord[] = [
-  { id: "1",  tokenBin: "412345", cardAssociation: "Visa",       bankCode: "BNK00123", status: "active",  createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Alice" },
-  { id: "2",  tokenBin: "512345", cardAssociation: "Mastercard", bankCode: "CBA45",   status: "deactive",createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Bob"   },
-  { id: "3",  tokenBin: "622222", cardAssociation: "UnionPay",   bankCode: "UP9988",  status: "active",  createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Cara"  },
-  { id: "4",  tokenBin: "371111", cardAssociation: "Amex",       bankCode: "AMX77",   status: "active",  createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Dana"  },
-  { id: "5",  tokenBin: "601155", cardAssociation: "Discover",   bankCode: "DISC001", status: "deactive",createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Evan"  },
-  { id: "6",  tokenBin: "352800", cardAssociation: "JCB",        bankCode: "JCB12",   status: "active",  createdAt: fmt(new Date(+NOW-9e7)), updatedAt: fmt(new Date(+NOW-5e7)), updatedBy: "Alex"  },
-  { id: "7",  tokenBin: "455667", cardAssociation: "Visa",       bankCode: "V45",     status: "active",  createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Mia"   },
+  { id: "1",  tokenBin: "412345", cardAssociation: "Visa",       bankCode: "BNK00123", status: "active",  createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "kevin" },
+  { id: "2",  tokenBin: "512345", cardAssociation: "Mastercard", bankCode: "CBA45",   status: "deactive",createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "devin"   },
+  { id: "3",  tokenBin: "622222", cardAssociation: "UnionPay",   bankCode: "UP9988",  status: "active",  createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "shaleen"  },
+  { id: "4",  tokenBin: "371111", cardAssociation: "Amex",       bankCode: "AMX77",   status: "active",  createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "wije"  },
+  { id: "5",  tokenBin: "601155", cardAssociation: "Discover",   bankCode: "DISC001", status: "deactive",createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "milta"  },
+  { id: "6",  tokenBin: "352800", cardAssociation: "JCB",        bankCode: "JCB12",   status: "active",  createdAt: fmt(new Date(+NOW-9e7)), updatedAt: fmt(new Date(+NOW-5e7)), updatedBy: "kanchuka"  },
+  { id: "7",  tokenBin: "455667", cardAssociation: "Visa",       bankCode: "V45",     status: "active",  createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "gayesh"   },
   { id: "8",  tokenBin: "545454", cardAssociation: "Mastercard", bankCode: "MC0099",  status: "deactive",createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Noah"  },
   { id: "9",  tokenBin: "378282", cardAssociation: "Amex",       bankCode: "AM3X",    status: "active",  createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Ivy"   },
   { id: "10", tokenBin: "601100", cardAssociation: "Discover",   bankCode: "D1",      status: "active",  createdAt: fmt(NOW), updatedAt: fmt(NOW), updatedBy: "Omar"  },

@@ -63,7 +63,7 @@ export default function Login() {
           <div className="grid gap-2">
             <div className="flex items-center">
               <Label htmlFor="password">Password</Label>
-              {/* <Link to="/forgot-password" className="ml-auto text-sm">Forgot password?</Link> */}
+              <Link to="/forgot-password" className="ml-auto text-sm">Forgot password?</Link>
             </div>
             <Input id="password" name="password" type="password" autoComplete="current-password" placeholder="Password" required />
             <InputError message={errors.password} />
