@@ -1,5 +1,5 @@
 import * as React from "react"
-import type {ColumnDef,ColumnFiltersState,SortingState,VisibilityState,} from "@tanstack/react-table"
+import type {ColumnDef,ColumnFiltersState,OnChangeFn,SortingState,VisibilityState,} from "@tanstack/react-table"
 import {flexRender,getCoreRowModel,getFilteredRowModel,getPaginationRowModel,getSortedRowModel,useReactTable,} from "@tanstack/react-table"
 
 import {Table,TableBody,TableCell,TableHead,TableHeader,TableRow,} from "@/components/ui/table"
@@ -11,31 +11,64 @@ import { Settings2 } from "lucide-react"
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  
+  /** Controlled sorting from parent (server-side) */
+  state?: { sorting?: SortingState }
+  onSortingChange?: OnChangeFn<SortingState>
+  /** When true, table won’t sort locally; parent fetches sorted data */
+  manualSorting?: boolean
 }
+
+
 
 export function DataTable<TData, TValue>({
   columns,
-  data,
+  data, 
+  state,
+  onSortingChange,
+  manualSorting,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([])
+  // const [sorting, setSorting] = React.useState<SortingState>([])
+  const [localSorting, setLocalSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
+
+   // use controlled sorting if provided, fallback to local
+  const sorting = state?.sorting ?? localSorting
+  const handleSortingChange: OnChangeFn<SortingState> =
+    onSortingChange ?? setLocalSorting
 
   const table = useReactTable({
     data,
     columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
+    // getCoreRowModel: getCoreRowModel(),
+    // getPaginationRowModel: getPaginationRowModel(),
+    // onSortingChange: setSorting,
+    // getSortedRowModel: getSortedRowModel(),
+    // onColumnFiltersChange: setColumnFilters,
+    // getFilteredRowModel: getFilteredRowModel(),
+    // onColumnVisibilityChange: setColumnVisibility,
+    // state: {
+    //   sorting,
+    //   columnFilters,
+    //   columnVisibility,
+    // },
     state: {
       sorting,
       columnFilters,
       columnVisibility,
     },
+    onSortingChange: handleSortingChange,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+
+    // server-side sorting: pass manualSorting to avoid reordering locally
+    manualSorting: !!manualSorting,
+
+    getCoreRowModel: getCoreRowModel(),
+    // Keep this so TanStack can compute sort indicators even if manual
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
   })
 
   // const emailCol = table.getColumn("email");

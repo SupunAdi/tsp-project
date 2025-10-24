@@ -10,7 +10,7 @@ import { ArrowUp, ArrowDown, MoreHorizontal } from "lucide-react"
 export type InstanceRecord = {
   code: string
   name: string
-  status: string          // ACT / DEACT
+  status: string          
   profileCode: string
   createdTime: string
   lastUpdateTime: string
@@ -46,7 +46,6 @@ export function createColumns(): ColumnDef<InstanceRecord>[] {
     {
       accessorKey: "status",
       header: ({ column }) => <SortHeader column={column} label="Status" />,
-      // ✅ black badge for Active; white badge for Deactive
       cell: ({ row }) => {
         const s = row.original.status?.toUpperCase()
         const active = s === "ACT" || s === "ACTIVE"
@@ -75,7 +74,6 @@ export function createColumns(): ColumnDef<InstanceRecord>[] {
       header: ({ column }) => <SortHeader column={column} label="Last Update Time" />,
       cell: ({ row }) => <div className="text-center tabular-nums"><DateCell value={row.original.lastUpdateTime} /></div> },
 
-    // ✅ Action column stays last
     {
       id: "actions",
       header: () => <div className="text-center">Action</div>,
