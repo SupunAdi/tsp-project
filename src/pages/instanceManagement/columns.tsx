@@ -2,17 +2,22 @@ import type { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ArrowUp, ArrowDown, MoreHorizontal } from "lucide-react"
 
+// Row type must match API payload (InstanceResponse)
 export type InstanceRecord = {
-  code: string
-  name: string
-  status: string          
+  instanceId: string
+  instanceName: string
+  instanceStatus: string          
   profileCode: string
-  createdTime: string
+  createTime: string
   lastUpdateTime: string
 }
 
@@ -37,43 +42,66 @@ const SortHeader: React.FC<{ column: any; label: string }> = ({ column, label })
 
 export function createColumns(): ColumnDef<InstanceRecord>[] {
   return [
-    { accessorKey: "code",
-      header: ({ column }) => <SortHeader column={column} label="Code" />,
-      cell: ({ row }) => <div className="text-center font-medium">{row.original.code}</div> },
-    { accessorKey: "name",
-      header: ({ column }) => <SortHeader column={column} label="Name" />,
-      cell: ({ row }) => <div className="text-center">{row.original.name}</div> },
     {
-      accessorKey: "status",
+      accessorKey: "instanceId", // maps to backend sort "instanceId" -> "code"
+      header: ({ column }) => <SortHeader column={column} label="Instance Code" />,
+      cell: ({ row }) => <div className="text-center font-medium">{row.original.instanceId}</div>,
+      enableSorting: true,
+      enableHiding: true,
+    },
+    {
+      accessorKey: "instanceName", // "instanceName" -> "name"
+      header: ({ column }) => <SortHeader column={column} label="Instance Name" />,
+      cell: ({ row }) => <div className="text-center">{row.original.instanceName}</div>,
+      enableSorting: true,
+      enableHiding: true,
+    },
+    {
+      accessorKey: "instanceStatus", // "instanceStatus" -> "status.code"
       header: ({ column }) => <SortHeader column={column} label="Status" />,
       cell: ({ row }) => {
-        const s = row.original.status?.toUpperCase()
+        const s = row.original.instanceStatus?.toUpperCase()
         const active = s === "ACT" || s === "ACTIVE"
         return (
           <div className="text-center">
-            <Badge
-              className={
-                active
-                  ? "bg-black text-white hover:bg-black"
-                  : "bg-white text-black border border-gray-300 hover:bg-white"
-              }
-            >
+            <Badge className={active ? "bg-black text-white hover:bg-black" : "bg-white text-black border hover:bg-white"}>
               {active ? "Active" : "Deactive"}
             </Badge>
           </div>
         )
       },
+      enableSorting: true,
+      enableHiding: true,
     },
-    { accessorKey: "profileCode",
-      header: ({ column }) => <SortHeader column={column} label="Profile" />,
-      cell: ({ row }) => <div className="text-center">{row.original.profileCode}</div> },
-    { accessorKey: "createdTime",
-      header: ({ column }) => <SortHeader column={column} label="Create Time" />,
-      cell: ({ row }) => <div className="text-center tabular-nums"><DateCell value={row.original.createdTime} /></div> },
-    { accessorKey: "lastUpdateTime",
+    {
+      accessorKey: "profileCode", // "profileCode" -> "profile.code"
+      header: ({ column }) => <SortHeader column={column} label="Profile Code" />,
+      cell: ({ row }) => <div className="text-center">{row.original.profileCode}</div>,
+      enableSorting: true,
+      enableHiding: true,
+    },
+    {
+      accessorKey: "createTime", // "createTime" -> "createdTime"
+      header: ({ column }) => <SortHeader column={column} label="Created Time" />,
+      cell: ({ row }) => (
+        <div className="text-center tabular-nums">
+          <DateCell value={row.original.createTime} />
+        </div>
+      ),
+      enableSorting: true,
+      enableHiding: true,
+    },
+    {
+      accessorKey: "lastUpdateTime", // "lastUpdateTime" -> "lastUpdatedTime"
       header: ({ column }) => <SortHeader column={column} label="Last Update Time" />,
-      cell: ({ row }) => <div className="text-center tabular-nums"><DateCell value={row.original.lastUpdateTime} /></div> },
-
+      cell: ({ row }) => (
+        <div className="text-center tabular-nums">
+          <DateCell value={row.original.lastUpdateTime} />
+        </div>
+      ),
+      enableSorting: true,
+      enableHiding: true,
+    },
     {
       id: "actions",
       header: () => <div className="text-center">Action</div>,
@@ -90,15 +118,17 @@ export function createColumns(): ColumnDef<InstanceRecord>[] {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => alert(`Editing ${rec.code}`)}>Edit</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => alert(`Deleting ${rec.code}`)}>Delete</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => alert(`View ${rec.instanceId}`)}>View</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => alert(`Edit ${rec.instanceId}`)}>Edit</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => alert(`Viewing ${rec.code}`)}>View</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => alert(`Delete ${rec.instanceId}`)}>Delete</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         )
       },
+      enableSorting: false,
+      enableHiding: true,
     },
   ]
 }
