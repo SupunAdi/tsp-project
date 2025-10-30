@@ -1,6 +1,6 @@
 import * as React from "react"
 import type {ColumnDef,ColumnFiltersState,OnChangeFn,SortingState,VisibilityState,} from "@tanstack/react-table"
-import {flexRender,getCoreRowModel,getFilteredRowModel,getPaginationRowModel,getSortedRowModel,useReactTable,} from "@tanstack/react-table"
+import {flexRender,getCoreRowModel,getFilteredRowModel,getSortedRowModel,useReactTable,} from "@tanstack/react-table"
 
 import {Table,TableBody,TableCell,TableHead,TableHeader,TableRow,} from "@/components/ui/table"
 import { Button } from "@/components/ui/button";

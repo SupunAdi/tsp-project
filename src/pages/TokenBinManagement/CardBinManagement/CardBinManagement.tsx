@@ -1,84 +1,88 @@
 import { useEffect, useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { RefreshCcw } from "lucide-react"
+import { CheckCircle2, Clock, CreditCard, RefreshCcw, XCircle } from "lucide-react"
 
 import { DataTable } from "@/components/ui/data-table"
 import PaginationBar from "@/components/pagination-bar"
-import { usePagination } from "@/hooks/use-pagination"
 
 import type { TokenBinRecord } from "./columns"
 import { createColumns } from "./columns"
 import api from "@/lib/api/api"
 
-type ApiTokenBin = {
-  tokenBin: string
-  cardAssociation: string | null
-  status: string | null            
-  createTime: string | null
-  updateTime: string | null
-  lastUpdatedUser: string | null
-  bankCode: string | null
+import type { SortingState } from "@tanstack/react-table"
+
+type PageResponse<T> = {
+  content: T[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+  first: boolean
+  last: boolean
+  hasNext: boolean
+  hasPrevious: boolean
 }
 
 export default function CardBinManagement() {
-  const [rows, setRows] = useState<TokenBinRecord[]>([])
+    const [rows, setRows] = useState<TokenBinRecord[]>([])
+    const [total, setTotal] = useState(0)
+    const [page, setPage] = useState(1)          // UI is 1-based
+    const [pageSize, setPageSize] = useState(5)  // 5 | 10 | 20
+
+      const [sorting, setSorting] = useState<SortingState>([
+    { id: "tokenBin", desc: false }
+  ]) 
+
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  const activeCount = rows.filter(r => r.status === "active").length
+  const deactiveCount = rows.filter(r => r.status === "deactive").length
+
+  const sort = sorting[0]?.id
+  const dir  = sorting[0]?.desc ? "desc" : "asc"
 
   const load = async () => {
     try {
       setLoading(true)
       setError(null)
 
-      const res = await api.get<ApiTokenBin[]>("/tsp/v1/card-token-bin")
-      const list = Array.isArray(res.data) ? res.data : []
+      const res = await api.get<PageResponse<TokenBinRecord>>("/tsp/v1/card-token-bin", {
+        params: {
+          page: page - 1,   // backend is 0-based
+          size: pageSize,   // 5/10/20
+          sort,             
+          dir,              
+        },
+      })
 
-      const data: TokenBinRecord[] = list.map((x) => ({
-        id: String(x.tokenBin ?? crypto.randomUUID()),
-        tokenBin: x.tokenBin ?? "",
-        cardAssociation: x.cardAssociation ?? "",
-        bankCode: x.bankCode ?? "",
-        // normalize status -> "active" | "deactive"
-        status: (x.status ?? "").toString().toUpperCase().startsWith("ACT") ? "active" : "deactive",
-        createdAt: x.createTime ?? "",
-        updatedAt: x.updateTime ?? "",
-        updatedBy: x.lastUpdatedUser ?? "",
-      }))
+       const mapped = (res.data.content ?? []).map(item => ({
+      ...item,
+      status: ((item.status ?? "").toUpperCase().startsWith("ACT")
+        ? "active"
+        : "deactive") as "active" | "deactive",
+    }))
 
-      setRows(data)
-    } catch (e: any) {
-      const msg =
-        e?.response?.data?.message ||
-        e?.message ||
-        "Failed to load card token BINs"
+      setRows(mapped)
+      setTotal(res.data.totalElements ?? 0)
+
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || "Failed to load card token bins"
       setError(msg)
     } finally {
       setLoading(false)
     }
   }
-
-  useEffect(() => { load() }, [])
-
-  // pagination
-  const { page, setPage, pageSize, setPageSize, pageCount, range } = usePagination(rows.length, 5)
-  const currentRows = useMemo(
-    () => rows.slice((page - 1) * pageSize, (page - 1) * pageSize + pageSize),
-    [rows, page, pageSize]
-  )
+  
+  useEffect(() => { load() }, [page, pageSize, sort, dir])
+  useEffect(() => { setPage(1) }, [sorting])
 
   const columns = useMemo(() => createColumns(), [])
 
-  const activeCount = rows.filter(r => r.status === "active").length
-  const deactiveCount = rows.filter(r => r.status === "deactive").length
-  const lastUpdated = rows.length > 0
-    ? rows
-        .map(r => r.updatedAt)
-        .filter(Boolean)
-        .map(v => new Date(v))
-        .filter(d => !isNaN(d.getTime()))
-        .sort((a, b) => b.getTime() - a.getTime())[0]
-    : undefined
+  const pageCount = Math.max(1, Math.ceil(total / pageSize))
+  const start = total === 0 ? 0 : (page - 1) * pageSize + 1
+  const end = Math.min(page * pageSize, total)
+
 
   return (
     <div className="space-y-4">
@@ -87,73 +91,96 @@ export default function CardBinManagement() {
         <div>
           <h1 className="text-2xl font-semibold">Card BIN Management</h1>
           <p className="text-sm text-muted-foreground">
-            {loading ? "Loading…" : `Showing ${rows.length} BIN(s)`}
+            {loading ? "Loading…" : `Showing ${total} BIN(s)`}
           </p>
         </div>
-        <Button variant="outline" onClick={load} className="inline-flex items-center gap-2">
-          <RefreshCcw className="h-4 w-4" /> Reload
-        </Button>
+        <button onClick={load} className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm" title="Reload">
+            <RefreshCcw className="h-4 w-4" /> Reload
+        </button>
       </div>
+
+       {/* Error banner */}
+       {error && <div className="rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
 
       {/* KPIs */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Total BINs</CardTitle>
-            <CardDescription>All configured BINs</CardDescription>
-          </CardHeader>
-          <CardContent><div className="text-3xl font-semibold">{rows.length}</div></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Active</CardTitle>
-            <CardDescription>Status = ACT</CardDescription>
-          </CardHeader>
-          <CardContent><div className="text-3xl font-semibold">{activeCount}</div></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Deactive</CardTitle>
-            <CardDescription>Status = DEACT</CardDescription>
-          </CardHeader>
-          <CardContent><div className="text-3xl font-semibold">{deactiveCount}</div></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Last Updated</CardTitle>
-            <CardDescription>Most recent change</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-semibold">
-              {lastUpdated ? lastUpdated.toLocaleDateString() : "—"}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+         <Card>
+           <CardHeader className="pb-2">
+             <CardTitle className="text-base flex items-center gap-2">
+               <CreditCard className="h-4 w-4" /> Total BINs
+             </CardTitle>
+             <CardDescription>All configured BINs</CardDescription>
+           </CardHeader>
+           <CardContent><div className="text-3xl font-semibold">{loading ? "—" : total}</div></CardContent>
+         </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4" />
+                Active 
+              </CardTitle>
+              <CardDescription>Currently enabled</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-semibold">{loading ? "—" : activeCount}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <XCircle className="h-4 w-4" />
+                Deactive 
+              </CardTitle>
+              <CardDescription>Currently disabled</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-semibold">{loading ? "—" : deactiveCount}</div>
+            </CardContent>
+          </Card>
+       
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                Last Updated
+              </CardTitle>
+              <CardDescription>Most recent change</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-semibold">—</div>
+            </CardContent>
+          </Card>
+       </div> 
 
       {/* Table */}
       <div className="rounded-md border min-h-[120px]">
         {loading ? (
-          <div className="p-4 text-sm text-muted-foreground">Loading BINs…</div>
-        ) : error ? (
-          <div className="p-4 text-sm text-red-600">{error}</div>
+          <div className="p-4 text-sm text-muted-foreground">Loading card token bins</div>
         ) : rows.length === 0 ? (
-          <div className="p-4 text-sm text-muted-foreground">No data found.</div>
-        ) : (
-          <DataTable columns={columns} data={currentRows} />
+           <div className="p-4 text-sm text-muted-foreground">No card token bins found.</div>
+         ) : (
+          <DataTable
+            columns={columns}
+            data={rows}
+            state={{ sorting }}
+            onSortingChange={setSorting}  
+            manualSorting
+          />
         )}
       </div>
 
-      {/* Pagination */}
+      {/* Pagination (server-side) */}
       <PaginationBar
-        total={rows.length}
+        total={total}
         page={page}
         pageSize={pageSize}
         pageCount={pageCount}
-        start={range.start}
-        end={range.end}
+        start={start}
+        end={end}
         onPageChange={setPage}
-        onPageSizeChange={setPageSize}
+        onPageSizeChange={(s:number) => { setPageSize(s); setPage(1) }}
       />
     </div>
   )

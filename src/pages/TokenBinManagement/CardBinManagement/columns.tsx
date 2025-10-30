@@ -10,11 +10,13 @@ export type TokenBinRecord = {
   tokenBin: string
   cardAssociation: string
   bankCode: string
+  binSize: string
   status: "active" | "deactive"
-  createdAt: string
-  updatedAt: string
-  updatedBy: string
+  createTime: string
+  updateTime: string
+  lastUpdatedUser: string
 }
+
 
 const DateCell: React.FC<{ value?: string }> = ({ value }) => {
   if (!value) return <span>—</span>
@@ -41,24 +43,30 @@ export function createColumns(): ColumnDef<TokenBinRecord>[] {
       accessorKey: "tokenBin",
       header: ({ column }) => <SortHeader column={column} label="Token BIN" />,
       cell: ({ row }) => <div className="text-center font-medium">{row.original.tokenBin}</div>,
+      enableSorting: true,
+      enableHiding: true,
     },
     {
       accessorKey: "cardAssociation",
       header: ({ column }) => <SortHeader column={column} label="Card Association" />,
       cell: ({ row }) => <div className="text-center">{row.original.cardAssociation}</div>,
+      enableSorting: true,
+      enableHiding: true,
     },
     {
       accessorKey: "bankCode",
       header: ({ column }) => <SortHeader column={column} label="Bank Code" />,
       cell: ({ row }) => <div className="text-center tabular-nums">{row.original.bankCode}</div>,
+      enableSorting: true,
+      enableHiding: true,
     },
-    {
-      id: "binSize",
-      header: () => <div className="text-center">BIN Size</div>,
-      cell: ({ row }) => {
-        const t = row.original.tokenBin || ""
-        return <div className="text-center">{t.replace(/\D/g, "").length}</div>
-      },
+
+     {
+      accessorKey: "binSize",
+      header: ({ column }) => <SortHeader column={column} label="BIN Size" />,
+      cell: ({ row }) => <div className="text-center tabular-nums">{row.original.binSize}</div>,
+      enableSorting: true,
+      enableHiding: true,
     },
     {
       accessorKey: "status",
@@ -79,21 +87,29 @@ export function createColumns(): ColumnDef<TokenBinRecord>[] {
           </div>
         )
       },
+      enableSorting: true,
+      enableHiding: true,
     },
     {
-      accessorKey: "createdAt",
+      accessorKey: "createTime",
       header: ({ column }) => <SortHeader column={column} label="Create Time" />,
-      cell: ({ row }) => <div className="text-center tabular-nums"><DateCell value={row.original.createdAt} /></div>,
+      cell: ({ row }) => <div className="text-center tabular-nums"><DateCell value={row.original.createTime} /></div>,
+      enableSorting: true,
+      enableHiding: true,
     },
     {
-      accessorKey: "updatedAt",
+      accessorKey: "updateTime",
       header: ({ column }) => <SortHeader column={column} label="Update Time" />,
-      cell: ({ row }) => <div className="text-center tabular-nums"><DateCell value={row.original.updatedAt} /></div>,
+      cell: ({ row }) => <div className="text-center tabular-nums"><DateCell value={row.original.updateTime} /></div>,
+      enableSorting: true,
+      enableHiding: true,
     },
     {
-      accessorKey: "updatedBy",
+      accessorKey: "lastUpdatedUser",
       header: ({ column }) => <SortHeader column={column} label="Last Update User" />,
-      cell: ({ row }) => <div className="text-center">{row.original.updatedBy || "—"}</div>,
+      cell: ({ row }) => <div className="text-center">{row.original.lastUpdatedUser || "—"}</div>,
+      enableSorting: true,
+      enableHiding: true,
     },
     {
       id: "actions",
@@ -125,6 +141,9 @@ export function createColumns(): ColumnDef<TokenBinRecord>[] {
           </div>
         )
       },
+      enableSorting: false,
+      enableHiding: true,
     },
   ]
 }
+

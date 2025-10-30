@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { DataTable } from "@/components/ui/data-table"
@@ -29,7 +29,7 @@ export default function InstanceManagement() {
 
   const [sorting, setSorting] = useState<SortingState>([
     { id: "instanceId", desc: false }
-  ]) // [{id, desc}]
+  ]) 
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
