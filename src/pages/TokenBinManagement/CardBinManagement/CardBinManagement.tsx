@@ -10,6 +10,8 @@ import { createColumns } from "./columns"
 import api from "@/lib/api/api"
 
 import type { SortingState } from "@tanstack/react-table"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
 
 type PageResponse<T> = {
   content: T[]
@@ -83,6 +85,7 @@ export default function CardBinManagement() {
   const start = total === 0 ? 0 : (page - 1) * pageSize + 1
   const end = Math.min(page * pageSize, total)
 
+  const [open, setOpen] = useState(false)
 
   return (
     <div className="space-y-4">
@@ -153,6 +156,28 @@ export default function CardBinManagement() {
             </CardContent>
           </Card>
        </div> 
+
+        <div className="flex justify-end w-full -mt-1 mb-2">
+            <Dialog open={open} onOpenChange={setOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="sm:ml-auto">Add New Card Bin</Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Add New Card BIN</DialogTitle>
+                        <DialogDescription>Fill details and click Save.</DialogDescription>
+                      </DialogHeader>
+
+                      <div className="grid gap-4 py-2">
+
+                      </div>
+
+                      <DialogFooter>
+                          <Button >Save</Button>
+                      </DialogFooter>
+                  </DialogContent>
+            </Dialog>
+        </div>
 
       {/* Table */}
       <div className="rounded-md border min-h-[120px]">

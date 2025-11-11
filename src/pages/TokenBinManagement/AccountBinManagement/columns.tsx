@@ -7,110 +7,81 @@ import { MoreHorizontal, ArrowUp, ArrowDown } from "lucide-react"
 /** ---------------- Types ---------------- */
 export type AccountBinRecord = {
   id: string
-  accountBin: string
-  association: "Visa" | "Mastercard" | "Amex" | "Discover" | "JCB" | "UnionPay"
+  accountTokenBin: string
   bankCode: string
+  binSize: string
   status: "active" | "deactive"
-  createdAt: string
-  updatedAt: string
-  updatedBy: string
+  createTime: string
+  updateTime: string
+  lastUpdatedUser: string
 }
 
-/** --------------- Sample Data + Options --------------- */
-const NOW = new Date().toISOString()
 
-export const INITIAL_ROWS: AccountBinRecord[] = [
-  { id: "a1", accountBin: "ACC-1001", association: "Visa",       bankCode: "BNK00123", status: "active",   createdAt: NOW, updatedAt: NOW, updatedBy: "Alice" },
-  { id: "a2", accountBin: "ACC-1002", association: "Mastercard", bankCode: "CBA45",    status: "deactive", createdAt: NOW, updatedAt: NOW, updatedBy: "Bob" },
-  { id: "a3", accountBin: "ACC-1003", association: "UnionPay",   bankCode: "UP9988",   status: "active",   createdAt: NOW, updatedAt: NOW, updatedBy: "Cara" },
-]
+const DateCell: React.FC<{ value?: string }> = ({ value }) => {
+  if (!value) return <span>—</span>
+  const d = new Date(value)
+  return <span>{isNaN(d.getTime()) ? value : d.toLocaleString()}</span>
+}
 
-export const ASSOCIATIONS: AccountBinRecord["association"][] = [
-  "Visa", "Mastercard", "Amex", "Discover", "JCB", "UnionPay",
-]
+const SortHeader: React.FC<{ column: any; label: string }> = ({ column, label }) => (
+  <div className="text-center">
+    <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+      {label}
+      {column.getIsSorted() === "asc" ? (
+        <ArrowUp className="ml-2 h-4 w-4" />
+      ) : column.getIsSorted() === "desc" ? (
+        <ArrowDown className="ml-2 h-4 w-4" />
+      ) : null}
+    </Button>
+  </div>
+)
 
-export const BANK_CODES = [
-  "BNK00123", "CBA45", "UP9988", "AMX77", "DISC001", "JCB12",
-  "V45", "MC0099", "AM3X", "D1", "JCB0007", "BANKX",
-]
+const displayValue = (val?: string | null) => {
+  if (val === undefined || val === null || val === "" || val === " ") return "null"
+  return val
+}
 
-/** ---------------- Columns (optional TanStack variant) ---------------- */
-export function createColumns(opts: { onToggleStatus: (id: string) => void }): ColumnDef<AccountBinRecord>[] {
-  const { onToggleStatus } = opts
-
-  const sortIcon = (column: any) =>
-    column.getIsSorted() === "asc" ? (
-      <ArrowUp className="ml-2 h-4 w-4" />
-    ) : column.getIsSorted() === "desc" ? (
-      <ArrowDown className="ml-2 h-4 w-4" />
-    ) : null
-
-  return [
+export function createColumns(): ColumnDef<AccountBinRecord>[] {
+    return [
     {
-      accessorKey: "accountBin",
-      header: ({ column }) => (
-        <div className="text-center">
-          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-            Account BIN {sortIcon(column)}
-          </Button>
-        </div>
-      ),
-      cell: ({ row }) => <div className="text-center">{row.getValue("accountBin")}</div>,
+      accessorKey: "tokenBin",
+      header: ({ column }) => <SortHeader column={column} label="Account BIN" />,
+      cell: ({row}) => <div className="text-center font-medium">{row.original.accountTokenBin}</div>,
+
       enableSorting: true,
       enableHiding: true,
     },
-    {
-      accessorKey: "association",
-      header: ({ column }) => (
-        <div className="text-center">
-          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-            Association {sortIcon(column)}
-          </Button>
-        </div>
-      ),
-      cell: ({ row }) => <div className="text-center">{row.getValue("association")}</div>,
-      enableSorting: true,
-      enableHiding: true,
-    },
+
     {
       accessorKey: "bankCode",
-      header: ({ column }) => (
-        <div className="text-center">
-          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-            Bank Code {sortIcon(column)}
-          </Button>
-        </div>
-      ),
-      cell: ({ row }) => <div className="text-center tabular-nums">{row.getValue("bankCode")}</div>,
+      header: ({ column }) => <SortHeader column={column} label="Bank Code" />,
+      cell: ({ row }) => <div className="text-center tabular-nums">{row.original.bankCode}</div>,
       enableSorting: true,
       enableHiding: true,
     },
-    {
-      id: "accountBinSize",
-      header: () => <div className="text-center">Account BIN Size</div>,
-      // based on digits inside accountBin (e.g. "ACC-1001" -> 4)
-      cell: ({ row }) => {
-        const t: string = row.original.accountBin || ""
-        return <div className="text-center">{t.replace(/\D/g, "").length}</div>
-      },
-      enableSorting: false,
+
+     {
+      accessorKey: "binSize",
+      header: ({ column }) => <SortHeader column={column} label="BIN Size" />,
+      cell: ({ row }) => <div className="text-center tabular-nums">{row.original.binSize}</div>,
+      enableSorting: true,
       enableHiding: true,
     },
     {
       accessorKey: "status",
-      header: ({ column }) => (
-        <div className="text-center">
-          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-            Status {sortIcon(column)}
-          </Button>
-        </div>
-      ),
+      header: ({ column }) => <SortHeader column={column} label="Status" />,
       cell: ({ row }) => {
-        const status = row.original.status
+        const active = row.original.status === "active"
         return (
           <div className="text-center">
-            <Badge variant={status === "active" ? "default" : "secondary"}>
-              {status === "active" ? "Active" : "Deactive"}
+            <Badge
+              className={
+                active
+                  ? "bg-black text-white hover:bg-black"
+                  : "bg-white text-black border border-gray-300 hover:bg-white"
+              }
+            >
+              {active ? "Active" : "Deactive"}
             </Badge>
           </div>
         )
@@ -119,41 +90,24 @@ export function createColumns(opts: { onToggleStatus: (id: string) => void }): C
       enableHiding: true,
     },
     {
-      accessorKey: "createdAt",
-      header: ({ column }) => (
-        <div className="text-center">
-          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-            Create time {sortIcon(column)}
-          </Button>
-        </div>
-      ),
-      cell: ({ row }) => <div className="text-center">{new Date(row.original.createdAt).toLocaleString()}</div>,
+      accessorKey: "createTime",
+      header: ({ column }) => <SortHeader column={column} label="Create Time" />,
+      cell: ({ row }) => <div className="text-center tabular-nums"><DateCell value={row.original.createTime} /></div>,
       enableSorting: true,
       enableHiding: true,
     },
     {
-      accessorKey: "updatedAt",
-      header: ({ column }) => (
-        <div className="text-center">
-          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-            Update time {sortIcon(column)}
-          </Button>
-        </div>
-      ),
-      cell: ({ row }) => <div className="text-center">{new Date(row.original.updatedAt).toLocaleString()}</div>,
+      accessorKey: "updateTime",
+      header: ({ column }) => <SortHeader column={column} label="Update Time" />,
+      cell: ({ row }) => <div className="text-center tabular-nums"><DateCell value={row.original.updateTime} /></div>,
       enableSorting: true,
       enableHiding: true,
     },
     {
-      accessorKey: "updatedBy",
-      header: ({ column }) => (
-        <div className="text-center">
-          <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-            Last update user {sortIcon(column)}
-          </Button>
-        </div>
-      ),
-      cell: ({ row }) => <div className="text-center">{row.getValue("updatedBy")}</div>,
+      accessorKey: "lastUpdatedUser",
+      header: ({ column }) => <SortHeader column={column} label="Last Update User" />,
+      cell: ({ row }) => <div className="text-center">{row.original.lastUpdatedUser || "—"}</div>,
+
       enableSorting: true,
       enableHiding: true,
     },
@@ -174,21 +128,14 @@ export function createColumns(opts: { onToggleStatus: (id: string) => void }): C
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
-                <DropdownMenuItem onClick={() => onToggleStatus(rec.id)}>
+                <DropdownMenuItem onClick={() => alert(`Toggling ${rec.accountTokenBin}`)}>
                   {rec.status === "active" ? "Deactivate" : "Activate"}
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator />
-
-                <DropdownMenuItem onClick={() => alert(`Editing ${rec.accountBin}`)}>
-                  Edit
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => alert(`Deleting ${rec.accountBin}`)}>
-                  Delete
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => alert(`Viewing ${rec.accountBin}`)}>
-                  View
-                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => alert(`Editing BIN ${rec.accountTokenBin}`)}>Edit</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => alert(`Deleting BIN ${rec.accountTokenBin}`)}>Delete</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => alert(`Viewing BIN ${rec.accountTokenBin}`)}>View</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -199,3 +146,4 @@ export function createColumns(opts: { onToggleStatus: (id: string) => void }): C
     },
   ]
 }
+

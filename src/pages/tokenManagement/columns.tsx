@@ -8,8 +8,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, ArrowUp, ArrowDown, Badge } from "lucide-react"
-
+import { MoreHorizontal, ArrowUp, ArrowDown, } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 
 // Row type must match API payload (TokenManagementResponse)
 export type TokenManagementRecord = {
@@ -36,6 +36,11 @@ export type TokenManagementRecord = {
 const maskPan = (pan?: string) =>
   !pan ? "" : pan.length <= 4 ? pan : `${"*".repeat(pan.length - 4)}${pan.slice(-4)}`
 
+const displayValue = (val?: string | null) => {
+  if (val === undefined || val === null || val === "" || val === " ") return "null"
+  return val
+}
+
 // Reusable sort header 
 const SortHeader: React.FC<{ column: any; label: string }> = ({ column, label }) => (
   <div className="text-center">
@@ -55,84 +60,84 @@ export function createColumns(): ColumnDef<TokenManagementRecord>[] {
     {
       accessorKey: "id", 
       header: ({ column }) => <SortHeader column={column} label="Id" />,
-      cell: ({ row }) => <div className="text-center font-medium">{row.original.id}</div>,
+      cell: ({ row }) => <div className="text-center font-medium">{displayValue(row.original.id)}</div>,
       enableSorting: true,
       enableHiding: true,
     },
     {
       accessorKey: "instanceId", 
       header: ({ column }) => <SortHeader column={column} label="Instance Id" />,
-      cell: ({ row }) => <div className="text-center font-medium">{row.original.instanceId}</div>,
+      cell: ({ row }) => <div className="text-center font-medium">{displayValue(row.original.instanceId)}</div>,
       enableSorting: true,
       enableHiding: true,
     },
     {
       accessorKey: "cardNumber", 
       header: ({ column }) => <SortHeader column={column} label="Card Number" />,
-      cell: ({ row }) => <div className="text-center font-medium">{maskPan(row.original.cardNumber)}</div>,
+      cell: ({ row }) => <div className="text-center font-medium">{displayValue(maskPan(row.original.cardNumber))}</div>,
       enableSorting: true,
       enableHiding: true,
     },   
     {
       accessorKey: "nameOnCard", 
       header: ({ column }) => <SortHeader column={column} label="Name On Card" />,
-      cell: ({ row }) => <div className="text-center font-medium">{row.original.nameOnCard}</div>,
+      cell: ({ row }) => <div className="text-center font-medium">{displayValue(row.original.nameOnCard)}</div>,
       enableSorting: true,
       enableHiding: true,
     },    
     {
       accessorKey: "expiry", 
       header: ({ column }) => <SortHeader column={column} label="Expiry" />,
-      cell: ({ row }) => <div className="text-center font-medium">{row.original.expiry}</div>,
+      cell: ({ row }) => <div className="text-center font-medium">{displayValue(row.original.expiry)}</div>,
       enableSorting: true,
       enableHiding: true,
     },   
     {
       accessorKey: "cvv", 
       header: ({ column }) => <SortHeader column={column} label="CVV" />,
-      cell: ({ row }) => <div className="text-center font-medium">{row.original.cvv}</div>,
+      cell: ({ row }) => <div className="text-center font-medium">{displayValue(row.original.cvv)}</div>,
       enableSorting: true,
       enableHiding: true,
     },
     {
       accessorKey: "nic", 
       header: ({ column }) => <SortHeader column={column} label="NIC" />,
-      cell: ({ row }) => <div className="text-center font-medium">{row.original.nic}</div>,
+      cell: ({ row }) => <div className="text-center font-medium">{displayValue(row.original.nic)}</div>,
       enableSorting: true,
       enableHiding: true,
     },    
     {
       accessorKey: "accountHolderName", 
-      header: ({ column }) => <SortHeader column={column} label="accountHolderName" />,
-      cell: ({ row }) => <div className="text-center font-medium">{row.original.accountHolderName}</div>,
+      header: ({ column }) => <SortHeader column={column} label="Account Holder Name" />,
+      cell: ({ row }) => <div className="text-center font-medium">{displayValue(row.original.accountHolderName)}</div>,
       enableSorting: true,
       enableHiding: true,
     },    
     {
       accessorKey: "accountNumber", 
-      header: ({ column }) => <SortHeader column={column} label="accountNumber" />,
-      cell: ({ row }) => <div className="text-center font-medium">{row.original.accountNumber}</div>,
+      header: ({ column }) => <SortHeader column={column} label="Account Number" />,
+      cell: ({ row }) => <div className="text-center font-medium">{displayValue(row.original.accountNumber)}</div>,
       enableSorting: true,
       enableHiding: true,
     },   
     {
       accessorKey: "tokenType", 
       header: ({ column }) => <SortHeader column={column} label="Token Type" />,
-      cell: ({ row }) => <div className="text-center font-medium">{row.original.tokenType}</div>,
+      cell: ({ row }) => <div className="text-center font-medium">{displayValue(row.original.tokenType)}</div>,
       enableSorting: true,
       enableHiding: true,
     },
     {
       accessorKey: "token", 
       header: ({ column }) => <SortHeader column={column} label="Token" />,
-      cell: ({ row }) => <div className="text-center font-medium">{row.original.token}</div>,
+      cell: ({ row }) => <div className="text-center font-medium">{displayValue(row.original.token)}</div>,
       enableSorting: true,
       enableHiding: true,
     },
     {
       accessorKey: "tokenExpiry", 
       header: ({ column }) => <SortHeader column={column} label="Token Expiry" />,
-      cell: ({ row }) => <div className="text-center font-medium">{row.original.tokenExpiry}</div>,
+      cell: ({ row }) => <div className="text-center font-medium">{displayValue(row.original.tokenExpiry)}</div>,
       enableSorting: true,
       enableHiding: true,
     },  
@@ -158,35 +163,35 @@ export function createColumns(): ColumnDef<TokenManagementRecord>[] {
     {
       accessorKey: "createdTime", 
       header: ({ column }) => <SortHeader column={column} label="Created Time" />,
-      cell: ({ row }) => <div className="text-center font-medium">{row.original.createdTime}</div>,
+      cell: ({ row }) => <div className="text-center font-medium">{displayValue(row.original.createdTime)}</div>,
       enableSorting: true,
       enableHiding: true,
     },
     {
       accessorKey: "lastUpdatedTime", 
       header: ({ column }) => <SortHeader column={column} label="Last Updated Time" />,
-      cell: ({ row }) => <div className="text-center font-medium">{row.original.lastUpdatedTime}</div>,
+      cell: ({ row }) => <div className="text-center font-medium">{displayValue(row.original.lastUpdatedTime)}</div>,
       enableSorting: true,
       enableHiding: true,
     },
     {
       accessorKey: "bankCode", 
       header: ({ column }) => <SortHeader column={column} label="bankCode" />,
-      cell: ({ row }) => <div className="text-center font-medium">{row.original.bankCode}</div>,
+      cell: ({ row }) => <div className="text-center font-medium">{displayValue(row.original.bankCode)}</div>,
       enableSorting: true,
       enableHiding: true,
     },
     {
       accessorKey: "cardAssociation", 
       header: ({ column }) => <SortHeader column={column} label="Card Association" />,
-      cell: ({ row }) => <div className="text-center font-medium">{row.original.cardAssociation}</div>,
+      cell: ({ row }) => <div className="text-center font-medium">{displayValue(row.original.cardAssociation)}</div>,
       enableSorting: true,
       enableHiding: true,
     },
     {
       accessorKey: "hashCardNumber", 
-      header: ({ column }) => <SortHeader column={column} label="hashCardNumber" />,
-      cell: ({ row }) => <div className="text-center font-medium">{row.original.hashCardNumber}</div>,
+      header: ({ column }) => <SortHeader column={column} label="Hash Card Number" />,
+      cell: ({ row }) => <div className="text-center font-medium">{displayValue(row.original.hashCardNumber)}</div>,
       enableSorting: true,
       enableHiding: true,
     },
