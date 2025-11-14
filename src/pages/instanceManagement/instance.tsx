@@ -8,6 +8,9 @@ import { createColumns } from "./columns"
 import api from "@/lib/api/api"
 import { RefreshCcw } from "lucide-react"
 import type { SortingState } from "@tanstack/react-table"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 
 type PageResponse<T> = {
   content: T[]
@@ -70,6 +73,62 @@ export default function InstanceManagement() {
   const start = total === 0 ? 0 : (page - 1) * pageSize + 1
   const end = Math.min(page * pageSize, total)
 
+  // dialog state
+    const [open, setOpen] = useState(false)
+    const [saving, setSaving] = useState(false)
+    const [formErr, setFormErr] = useState<string | null>(null)
+      
+    const [traceId, setTraceId] = useState("")
+    const [instanceName, setInstanceName] = useState("")
+    const [profileId, setProfileId] = useState("")
+
+    const resetForm=()=> {
+      setTraceId("")
+      setInstanceName("")
+      setProfileId("")
+      setFormErr(null)
+    }
+  
+  const handleOpenChange = (v: boolean) => {
+    setOpen(v)
+    if (!v) resetForm()          // <-- clear when closing
+  }
+
+    const handleSave = async () => {
+    try {
+      setSaving(true)
+      setFormErr(null)
+
+    if (!/^\d{6}$/.test(traceId)) {
+      setFormErr("Trace Id must be exactly 6 digits")
+      setSaving(false)
+      return
+    }
+
+    const payload = {
+      traceId: traceId.trim(),
+      instanceName: instanceName.trim(),
+      profileId: profileId.trim(),
+    }
+
+    const res = await api.post("/tsp/v1/instance/create-instance", payload)
+
+    //  check your wrapped response
+    const isOk = res?.data?.code === "00" || res?.data?.code === "TSP_REQUEST_PROCESS_SUCCESS"
+    if (!isOk) {
+      setFormErr(res?.data?.message || "Request failed")
+      return 
+    }
+      setOpen(false)
+      await load()
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || "Failed to create profile"
+      setFormErr(msg)
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -119,6 +178,59 @@ export default function InstanceManagement() {
           </CardContent>
         </Card>
       </div>
+
+            <div className="flex justify-end w-full -mt-1 mb-2">
+              <Dialog open={open} onOpenChange={handleOpenChange}>
+                  <DialogTrigger asChild>
+                     <Button className="sm:ml-auto" onClick={() => { resetForm(); setOpen(true) }}>Add New Instance</Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Add New Instance</DialogTitle>
+                        <DialogDescription>Fill details and click Save.</DialogDescription>
+                      </DialogHeader>
+
+                      {formErr && ( <div className="text-sm text-red-600 border border-red-200 rounded-md p-2">{formErr}</div> )}
+
+                      <div className="grid gap-4 py-2">
+                        <Label htmlFor="traceId">Trace Id</Label>
+                          <Input   
+                            id="traceId"
+                            placeholder="123456"
+                            value={traceId}
+                            onChange={(e) => setTraceId(e.target.value.trim())}
+                          />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="instanceName">Instance Name</Label>
+                          <Input   
+                            id="instanceName"
+                            placeholder=""
+                            value={instanceName}
+                            onChange={(e) => setInstanceName(e.target.value.trim())}
+                          />
+                      </div> 
+                      <div className="grid gap-2">
+                        <Label htmlFor="profileId">Profile Id</Label>
+                         <Input   
+                            id="profileId"
+                            placeholder="P001"
+                            value={profileId}
+                            onChange={(e) => setProfileId(e.target.value.trim())}
+                          />
+                      </div>
+
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setOpen(false)} disabled={saving}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleSave} disabled={saving}>
+                            {saving ? "Saving..." : "Save"}
+                        </Button> 
+                      </DialogFooter>              
+                  </DialogContent>
+            </Dialog>
+        </div>
 
       {/* Table */}
       <div className="rounded-md border min-h-[120px]">

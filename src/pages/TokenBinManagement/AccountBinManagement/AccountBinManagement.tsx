@@ -163,7 +163,7 @@ export default function AccountBinManagement() {
         <div className="flex justify-end w-full -mt-1 mb-2">
             <Dialog open={open} onOpenChange={setOpen}>
                   <DialogTrigger asChild>
-                    <Button className="sm:ml-auto">Add New Card Bin</Button>
+                    <Button className="sm:ml-auto">Add New Account Bin</Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-md">
                       <DialogHeader>

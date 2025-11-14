@@ -9,6 +9,8 @@ import api from "@/lib/api/api"
 import type { SortingState } from "@tanstack/react-table"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 type PageResponse<T> = {
   content: T[]
@@ -38,6 +40,39 @@ export default function Profile() {
   const sort = sorting[0]?.id
   const dir  = sorting[0]?.desc ? "desc" : "asc"
 
+  useEffect(() => { load() }, [page, pageSize, sort, dir])
+  useEffect(() => { setPage(1) }, [sorting])
+
+  const columns = useMemo(() => createColumns(), [])
+
+  const pageCount = Math.max(1, Math.ceil(total / pageSize))
+  const start = total === 0 ? 0 : (page - 1) * pageSize + 1
+  const end = Math.min(page * pageSize, total)
+
+// dialog state
+  const [open, setOpen] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [formErr, setFormErr] = useState<string | null>(null)
+    
+  const [traceId, setTraceId] = useState("")
+  const [cardExpiryProfile, setCardExpiryProfile] = useState("")
+  const [accountExpiryProfile, setAccountExpiryProfile] = useState("")
+  const [tokenLength, setTokenLength] = useState("")
+
+
+const resetForm = () => {
+  setTraceId("")
+  setCardExpiryProfile("")
+  setAccountExpiryProfile("")
+  setTokenLength("")
+  setFormErr(null)
+}
+
+const handleOpenChange = (v: boolean) => {
+  setOpen(v)
+  if (!v) resetForm()          // <-- clear when closing
+}
+
   const load = async () => {
     try {
       setLoading(true)
@@ -62,16 +97,46 @@ export default function Profile() {
     }
   }
 
-  useEffect(() => { load() }, [page, pageSize, sort, dir])
-  useEffect(() => { setPage(1) }, [sorting])
+  const handleSave = async () => {
+    try {
+      setSaving(true)
+      setFormErr(null)
 
-  const columns = useMemo(() => createColumns(), [])
+    if (!/^\d{6}$/.test(traceId)) {
+      setFormErr("Trace Id must be exactly 6 digits")
+      setSaving(false)
+      return
+    }
+    if (!tokenLength?.trim()) {
+      setFormErr("Token Length is required")
+      setSaving(false)
+      return
+    }
 
-  const pageCount = Math.max(1, Math.ceil(total / pageSize))
-  const start = total === 0 ? 0 : (page - 1) * pageSize + 1
-  const end = Math.min(page * pageSize, total)
+    const payload = {
+      traceId: traceId.trim(),
+      cardExpiryProfile: cardExpiryProfile.trim(),
+      accountExpiryProfile: accountExpiryProfile.trim(),
+      tokenLength: tokenLength.trim(),
+    }
 
-  const [open, setOpen] = useState(false)
+    const res = await api.post("/tsp/v1/profile/generate", payload)
+
+    //  check your wrapped response
+    const isOk = res?.data?.code === "00" || res?.data?.code === "TSP_REQUEST_PROCESS_SUCCESS"
+    if (!isOk) {
+      setFormErr(res?.data?.message || "Request failed")
+      return 
+    }
+      setOpen(false)
+      await load()
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || "Failed to create profile"
+      setFormErr(msg)
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -143,23 +208,65 @@ export default function Profile() {
          </Card>
       </div> 
       
-       <div className="flex justify-end w-full -mt-1 mb-2">
-            <Dialog open={open} onOpenChange={setOpen}>
-                  <DialogTrigger asChild>
-                    <Button className="sm:ml-auto">Add New Profile Bin</Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-md">
-                      <DialogHeader>
-                        <DialogTitle>Add New Profile</DialogTitle>
-                        <DialogDescription>Fill details and click Save.</DialogDescription>
-                      </DialogHeader>
+      <div className="flex justify-end w-full -mt-1 mb-2">
+            <Dialog open={open} onOpenChange={handleOpenChange}>
+              <DialogTrigger asChild>
+                <Button className="sm:ml-auto" onClick={() => { resetForm(); setOpen(true) }}>Add New Profile
+                </Button>
+              </DialogTrigger>  
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Add New Profile</DialogTitle>
+                    <DialogDescription>Fill details and click Save.</DialogDescription>
+                  </DialogHeader>
+
+                      {formErr && ( <div className="text-sm text-red-600 border border-red-200 rounded-md p-2">{formErr}</div> )}
 
                       <div className="grid gap-4 py-2">
-
+                        <div className="grid gap-2">
+                          <Label htmlFor="traceId">Trace Id</Label>
+                          <Input   
+                            id="traceId"
+                            placeholder="123456"
+                            value={traceId}
+                            onChange={(e) => setTraceId(e.target.value.trim())}
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="accountExpiryProfile">Account Expiry Profile</Label>
+                          <Input   
+                            id="accountExpiryProfile"
+                            placeholder="EXP001"
+                            value={accountExpiryProfile}
+                            onChange={(e) => setAccountExpiryProfile(e.target.value.trim())}
+                          />
+                        </div>  
+                        <div className="grid gap-2">
+                          <Label htmlFor="cardExpiryProfile">Card Expiry Profile</Label>
+                            <Input
+                              id="cardExpiryProfile"
+                              placeholder="EXP002"
+                              value={cardExpiryProfile}
+                              onChange={(e) => setCardExpiryProfile(e.target.value.trim())}                />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="tokenLength">Token Length</Label>
+                          <Input
+                            id="tokenLength"
+                            type="number"
+                            value={tokenLength}
+                            onChange={(e) => setTokenLength(e.target.value)}
+                          />
+                        </div>
                       </div>
 
                       <DialogFooter>
-                          <Button >Save</Button>
+                        <Button variant="outline" onClick={() => setOpen(false)} disabled={saving}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleSave} disabled={saving}>
+                            {saving ? "Saving..." : "Save"}
+                        </Button>
                       </DialogFooter>
                   </DialogContent>
             </Dialog>

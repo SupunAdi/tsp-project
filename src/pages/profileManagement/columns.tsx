@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { MoreHorizontal, ArrowUp, ArrowDown } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 
 // Row type
 export type PofileRecord = {
@@ -17,6 +18,7 @@ export type PofileRecord = {
   cardExpiryCode: string
   accountExpiryCode: string
   tokenLength: string
+  profileStatus: string
 }
 
 // shorten long DEKs for display
@@ -74,12 +76,34 @@ export function createColumns(): ColumnDef<PofileRecord>[] {
       enableHiding: true,
     },
     {
+      accessorKey: "profileStatus", 
+      header: ({ column }) => <SortHeader column={column} label="Status" />,
+      cell: ({ row }) => {
+           const s = row.original.profileStatus?.toUpperCase()
+        const active = s === "ACT" || s === "ACTIVE"
+        return (
+          <div className="text-center">
+            <Badge className={active ? "bg-black text-white hover:bg-black" : "bg-white text-black border hover:bg-white"}>
+              {active ? "Active" : "Deactive"}
+            </Badge>
+          </div>
+        )
+      },
+      enableSorting: true,
+      enableHiding: true,
+    },
+    {
       accessorKey: "tokenLength", 
-      header: ({ column }) => <SortHeader column={column} label="Token Length" />,
+      // header: ({ column }) => <SortHeader column={column} label="Token Length" />,
+          header: () => (
+        <div className="text-center">
+          <Button variant="ghost" >Token Length</Button>
+        </div>
+      ),
       cell: ({ row }) => (
         <div className="text-center tabular-nums">{row.original.tokenLength}</div>
       ),
-      enableSorting: true,
+      enableSorting: false,
       enableHiding: true,
     },
     {
