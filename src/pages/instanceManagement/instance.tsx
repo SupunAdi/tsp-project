@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { DataTable } from "@/components/ui/data-table"
 import PaginationBar from "@/components/pagination-bar"
-import type { InstanceRecord } from "./columns"
+import type { InstanceRecord, InstanceRowActions } from "./columns"
 import { createColumns } from "./columns"
 import api from "@/lib/api/api"
 import { RefreshCcw } from "lucide-react"
@@ -24,6 +24,8 @@ type PageResponse<T> = {
   hasPrevious: boolean
 }
 
+type Mode = "create" | "edit"
+
 export default function InstanceManagement() {
   const [rows, setRows] = useState<InstanceRecord[]>([])
   const [total, setTotal] = useState(0)
@@ -32,97 +34,209 @@ export default function InstanceManagement() {
 
   const [sorting, setSorting] = useState<SortingState>([
     { id: "instanceId", desc: false }
-  ]) 
+  ])
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const sort = sorting[0]?.id
-  const dir  = sorting[0]?.desc ? "desc" : "asc"
+  const dir = sorting[0]?.desc ? "desc" : "asc"
 
-  const load = async () => {
-    try {
-          setLoading(true)
-          setError(null)
 
-          const res = await api.get<PageResponse<InstanceRecord>>("/tsp/v1/instance", { 
-            params : {
-              page: page - 1,   // backend is 0-based
-              size: pageSize,   // 5/10/20
-              sort,             
-              dir, 
-            },
-          })
-          setRows(res.data.content ?? [])
-          setTotal(res.data.totalElements ?? 0)
-        } catch (err: any) {
-          const msg = err?.response?.data?.message || err?.message || "Failed to load instances"
-          setError(msg)
-        } finally {
-          setLoading(false)
-        }
 
-  }
-      
-  useEffect(() => { load() }, [page, pageSize, sort, dir])
-  useEffect(() => { setPage(1) }, [sorting])
-        
-  const columns = useMemo(() => createColumns(), [])
-        
+  // ------- dialog & form state --------
+  const [open, setOpen] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [formErr, setFormErr] = useState<string | null>(null)
+
+  const [mode, setMode] = useState<Mode>("create")
+  const [editingCode, setEditingCode] = useState<string | null>(null)
+
+  const [traceId, setTraceId] = useState("")
+  const [instanceName, setInstanceName] = useState("")
+  const [profileId, setProfileId] = useState("")
+
+  const [status, setStatus] = useState<"ACT" | "DEACT">("DEACT")
+  const [originalStatus, setOriginalStatus] = useState<"ACT" | "DEACT">("DEACT")
+
   const pageCount = Math.max(1, Math.ceil(total / pageSize))
   const start = total === 0 ? 0 : (page - 1) * pageSize + 1
   const end = Math.min(page * pageSize, total)
 
-  // dialog state
-    const [open, setOpen] = useState(false)
-    const [saving, setSaving] = useState(false)
-    const [formErr, setFormErr] = useState<string | null>(null)
-      
-    const [traceId, setTraceId] = useState("")
-    const [instanceName, setInstanceName] = useState("")
-    const [profileId, setProfileId] = useState("")
-
-    const resetForm=()=> {
-      setTraceId("")
-      setInstanceName("")
-      setProfileId("")
-      setFormErr(null)
-    }
-  
-  const handleOpenChange = (v: boolean) => {
-    setOpen(v)
-    if (!v) resetForm()          // <-- clear when closing
+  const resetForm = () => {
+    setTraceId("")
+    setInstanceName("")
+    setProfileId("")
+    setStatus("DEACT")
+    setOriginalStatus("DEACT")
+    setEditingCode(null)
+    setFormErr(null)
+    setMode("create")
   }
 
-    const handleSave = async () => {
+
+  const handleOpenChange = (v: boolean) => {
+    setOpen(v)
+    if (!v) resetForm()
+  }
+
+  const handleAddClick = () => {
+    resetForm()
+    setMode("create")
+    setOpen(true)
+  }
+
+
+  // ---------- row action handlers ----------
+  const handleViewRow = useCallback((row: InstanceRecord) => {
+    console.log("View instance", row.instanceId)
+  }, [])
+
+  const handleEditRow = useCallback((row: InstanceRecord) => {
+    setMode("edit")
+    setEditingCode(row.instanceId)
+
+    setInstanceName(row.instanceName || "")
+    setProfileId(row.profileCode || "")
+
+    const normalized =
+      row.instanceStatus?.toUpperCase() === "ACT" ||
+        row.instanceStatus?.toUpperCase() === "ACTIVE"
+        ? "ACT"
+        : "DEACT"
+    setStatus(normalized)
+    setOriginalStatus(normalized)
+
+    setTraceId("") // user must enter a new 6-digit traceId for the request
+    setFormErr(null)
+    setOpen(true)
+  }, [])
+
+  const handleDeleteRow = useCallback((row: InstanceRecord) => {
+    console.log("Delete instance (not implemented)", row.instanceId)
+  }, [])
+
+  const actions: InstanceRowActions = {
+    onView: handleViewRow,
+    onEdit: handleEditRow,
+    onDelete: handleDeleteRow,
+  }
+
+  const columns = useMemo(() => createColumns(actions), [actions])
+
+  // ---------- load list from backend ----------
+  const load = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const res = await api.get<PageResponse<InstanceRecord>>("/tsp/v1/instance", {
+        params: {
+          page: page - 1, // backend is 0-based
+          size: pageSize,
+          sort,
+          dir,
+        },
+      })
+
+      setRows(res.data.content ?? [])
+      setTotal(res.data.totalElements ?? 0)
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || "Failed to load instance"
+      setError(msg)
+    } finally {
+      setLoading(false)
+    }
+  }, [page, pageSize, sort, dir])
+
+  useEffect(() => {
+    load()
+  }, [load])
+
+  useEffect(() => {
+    setPage(1)
+  }, [sorting])
+
+  // ---------- Save (create / edit) ----------
+  const handleSave = async () => {
     try {
       setSaving(true)
       setFormErr(null)
 
-    if (!/^\d{6}$/.test(traceId)) {
-      setFormErr("Trace Id must be exactly 6 digits")
-      setSaving(false)
-      return
-    }
+      if (!/^\d{6}$/.test(traceId)) {
+        setFormErr("Trace Id must be exactly 6 digits")
+        setSaving(false)
+        return
+      }
+      if (!instanceName?.trim()) {
+        setFormErr("Instance name is required")
+        setSaving(false)
+        return
+      }
 
-    const payload = {
-      traceId: traceId.trim(),
-      instanceName: instanceName.trim(),
-      profileId: profileId.trim(),
-    }
+      const payload = {
+        traceId: traceId.trim(),
+        instanceName: instanceName.trim(),
+        profileId: profileId.trim(),
 
-    const res = await api.post("/tsp/v1/instance/create-instance", payload)
+      }
+      if (mode === "create") {
+        // CREATE -> POST /generate
+        const res = await api.post("/tsp/v1/instance/create-instance", payload)
+        const isOk =
+          res?.data?.code === "00" || res?.data?.code === "TSP_REQUEST_PROCESS_SUCCESS"
+        if (!isOk) {
+          setFormErr(res?.data?.message || "Request failed")
+          return
+        }
 
-    //  check your wrapped response
-    const isOk = res?.data?.code === "00" || res?.data?.code === "TSP_REQUEST_PROCESS_SUCCESS"
-    if (!isOk) {
-      setFormErr(res?.data?.message || "Request failed")
-      return 
-    }
+      //UPDATE
+      } else if (mode === "edit" && editingCode) {
+        const res = await api.put(`/tsp/v1/instance/update-instance/${editingCode}`, payload)
+        const isOk =
+          res?.data?.code === "00" || res?.data?.code === "TSP_REQUEST_PROCESS_SUCCESS"
+        if (!isOk) {
+          setFormErr(res?.data?.message || "Update failed")
+          return
+        }
+
+        // If status changed, call activate/deactivate
+        if (status !== originalStatus) {
+          const statusPayload = {
+            traceId: traceId.trim(),
+            instanceId: editingCode,
+            eventId: null,
+          }
+
+          if (status === "ACT") {
+            const resAct = await api.post("/tsp/v1/instance/activate-instance", statusPayload)
+            const okAct =
+              resAct?.data?.code === "00" ||
+              resAct?.data?.code === "TSP_REQUEST_PROCESS_SUCCESS"
+            if (!okAct) {
+              setFormErr(resAct?.data?.message || "Failed to activate instance")
+              return
+            }
+          } else {
+            const resDeact = await api.post("/tsp/v1/instance/deactivate-instance", statusPayload)
+            const okDeact =
+              resDeact?.data?.code === "00" ||
+              resDeact?.data?.code === "TSP_REQUEST_PROCESS_SUCCESS"
+            if (!okDeact) {
+              setFormErr(resDeact?.data?.message || "Failed to deactivate instance")
+              return
+            }
+          }
+        }
+      }
+
       setOpen(false)
       await load()
     } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.message || "Failed to create profile"
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        (mode === "create" ? "Failed to create instance" : "Failed to update instance")
       setFormErr(msg)
     } finally {
       setSaving(false)
@@ -143,6 +257,13 @@ export default function InstanceManagement() {
           <RefreshCcw className="h-4 w-4" /> Reload
         </Button>
       </div>
+
+      {/* Error banner */}
+      {error && (
+        <div className="rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
 
       {/* KPI cards (now use server total; active/deactive counts are on current page by design) */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -179,89 +300,115 @@ export default function InstanceManagement() {
         </Card>
       </div>
 
-            <div className="flex justify-end w-full -mt-1 mb-2">
-              <Dialog open={open} onOpenChange={handleOpenChange}>
-                  <DialogTrigger asChild>
-                     <Button className="sm:ml-auto" onClick={() => { resetForm(); setOpen(true) }}>Add New Instance</Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-md">
-                      <DialogHeader>
-                        <DialogTitle>Add New Instance</DialogTitle>
-                        <DialogDescription>Fill details and click Save.</DialogDescription>
-                      </DialogHeader>
+      {/* Add / Edit Dialog */}
+      <div className="flex justify-end w-full -mt-1 mb-2">
+        <Dialog open={open} onOpenChange={handleOpenChange}>
+          <DialogTrigger asChild>
+            <Button className="sm:ml-auto" onClick={handleAddClick}>
+              Add New Instance
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>
+                {mode === "create" ? "Add New Instance" : `Edit Instance ${editingCode}`}
+              </DialogTitle>
+              <DialogDescription>
+                {mode === "create"
+                  ? "Fill details and click Save."
+                  : "Update details and click Save."}
+              </DialogDescription>
+            </DialogHeader>
 
-                      {formErr && ( <div className="text-sm text-red-600 border border-red-200 rounded-md p-2">{formErr}</div> )}
+            {formErr && (<div className="text-sm text-red-600 border border-red-200 rounded-md p-2">{formErr}</div>)}
 
-                      <div className="grid gap-4 py-2">
-                        <Label htmlFor="traceId">Trace Id</Label>
-                          <Input   
-                            id="traceId"
-                            placeholder="123456"
-                            value={traceId}
-                            onChange={(e) => setTraceId(e.target.value.trim())}
-                          />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="instanceName">Instance Name</Label>
-                          <Input   
-                            id="instanceName"
-                            placeholder=""
-                            value={instanceName}
-                            onChange={(e) => setInstanceName(e.target.value.trim())}
-                          />
-                      </div> 
-                      <div className="grid gap-2">
-                        <Label htmlFor="profileId">Profile Id</Label>
-                         <Input   
-                            id="profileId"
-                            placeholder="P001"
-                            value={profileId}
-                            onChange={(e) => setProfileId(e.target.value.trim())}
-                          />
-                      </div>
+            <div className="grid gap-4 py-2">
+              <div className="grid gap-2">
+                <Label htmlFor="traceId">Trace Id</Label>
+                <Input
+                  id="traceId"
+                  placeholder="123456"
+                  value={traceId}
+                  onChange={(e) => setTraceId(e.target.value.trim())}
+                />
+              </div>
 
-                      <DialogFooter>
-                        <Button variant="outline" onClick={() => setOpen(false)} disabled={saving}>
-                            Cancel
-                        </Button>
-                        <Button onClick={handleSave} disabled={saving}>
-                            {saving ? "Saving..." : "Save"}
-                        </Button> 
-                      </DialogFooter>              
-                  </DialogContent>
-            </Dialog>
-        </div>
+              <div className="grid gap-2">
+                <Label htmlFor="instanceName">Instance Name</Label>
+                <Input
+                  id="instanceName"
+                  placeholder=""
+                  value={instanceName}
+                  onChange={(e) => setInstanceName(e.target.value.trim())}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="profileId">Profile Id</Label>
+                <Input
+                  id="profileId"
+                  placeholder="P001"
+                  value={profileId}
+                  onChange={(e) => setProfileId(e.target.value.trim())}
+                />
+              </div>
 
-      {/* Table */}
-      <div className="rounded-md border min-h-[120px]">
-        {loading ? (
-          <div className="p-4 text-sm text-muted-foreground">Loading instances…</div>
-        ) : error ? (
-          <div className="p-4 text-sm text-red-600">{error}</div>
-        ) : rows.length === 0 ? (
-          <div className="p-4 text-sm text-muted-foreground">No data found.</div>
-        ) : (
-          <DataTable
-            columns={columns}
-            data={rows}
-            state={{ sorting }}
-            onSortingChange={setSorting}
-            manualSorting
-          />
-        )}
-      </div>
-
-      {/* Pagination */}
-      <PaginationBar
-        total={total}
-        page={page}
-        pageSize={pageSize}
-        pageCount={pageCount}
-        start={start}
-        end={end}
-        onPageChange={setPage}
-        onPageSizeChange={(s:number) => { setPageSize(s); setPage(1) }}
-      />
+                {mode === "edit" && (
+                  <div className="grid gap-2">
+                    <Label htmlFor="status">Status</Label>
+                    <select
+                      id="status"
+                      className="border rounded-md px-2 py-2 text-sm"
+                      value={status}
+                      onChange={(e) => setStatus(e.target.value as "ACT" | "DEACT")}
+                    >
+                      <option value="ACT">Active</option>
+                      <option value="DEACT">Deactive</option>
+                    </select>
+                  </div>
+                )}
+            </div>
+            
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)} disabled={saving}>
+              Cancel
+            </Button>
+            <Button onClick={handleSave} disabled={saving}>
+              {saving ? "Saving..." : "Save"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
+
+
+      {/* Table */ }
+  <div className="rounded-md border min-h-[120px]">
+    {loading ? (
+      <div className="p-4 text-sm text-muted-foreground">Loading instances…</div>
+    ) : rows.length === 0 ? (
+      <div className="p-4 text-sm text-muted-foreground">No instance found.</div>
+    ) : (
+      <DataTable
+        columns={columns}
+        data={rows}
+        state={{ sorting }}
+        onSortingChange={setSorting}
+        manualSorting
+      />
+    )}
+  </div>
+
+  {/* Pagination */ }
+  <PaginationBar
+    total={total}
+    page={page}
+    pageSize={pageSize}
+    pageCount={pageCount}
+    start={start}
+    end={end}
+    onPageChange={setPage}
+    onPageSizeChange={(s: number) => { setPageSize(s); setPage(1) }}
+  />
+    </div >
   )
 }

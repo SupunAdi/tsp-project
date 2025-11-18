@@ -21,7 +21,12 @@ export type PofileRecord = {
   profileStatus: string
 }
 
-// shorten long DEKs for display
+export type ProfileRowActions = {
+  onView: (row: PofileRecord) => void
+  onEdit: (row: PofileRecord) => void
+  onDelete: (row: PofileRecord) => void
+}
+
 const short = (s: string, head = 8, tail = 6) =>
   !s ? "" : s.length <= head + tail ? s : `${s.slice(0, head)}…${s.slice(-tail)}`
 
@@ -39,8 +44,8 @@ const SortHeader: React.FC<{ column: any; label: string }> = ({ column, label })
   </div>
 )
 
-export function createColumns(): ColumnDef<PofileRecord>[] {
-  return [
+export function createColumns(actions: ProfileRowActions): ColumnDef<PofileRecord>[] {
+return [
     {
       accessorKey: "code", 
       header: ({ column }) => <SortHeader column={column} label="Code" />,
@@ -122,10 +127,16 @@ export function createColumns(): ColumnDef<PofileRecord>[] {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => alert(`View ${rec.code}`)}>View</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => alert(`Edit ${rec.code}`)}>Edit</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => actions.onView(rec)}>
+                  View
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => actions.onEdit(rec)}>
+                  Edit
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => alert(`Delete ${rec.code}`)}>Delete</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => actions.onDelete(rec)}>
+                  Delete
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
