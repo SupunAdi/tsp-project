@@ -120,9 +120,54 @@ export default function Profile() {
     setOpen(true)
   }, [])
 
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<PofileRecord | null>(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+
   const handleDeleteRow = useCallback((row: PofileRecord) => {
-    console.log("Delete profile (not implemented)", row.code)
+    setDeleteTarget(row)
+    setDeleteOpen(true)
   }, [])
+
+
+const handleConfirmDelete = async () => {
+  if (!deleteTarget) return
+
+  try {
+    setDeleteLoading(true)
+    setFormErr(null)
+
+    const payload = {
+      traceId: "123456",        // Or generate a new traceId if required
+      profileId: deleteTarget.code,
+      eventId: null,
+    }
+
+    const res = await api.post("/tsp/v1/profile/remove-profile", payload)
+
+    const ok =
+      res?.data?.code === "00" ||
+      res?.data?.code === "TSP_REQUEST_PROCESS_SUCCESS"
+
+    if (!ok) {
+      setFormErr(res?.data?.message || "Failed to delete profile")
+      return
+    }
+
+    setDeleteOpen(false)
+    setDeleteTarget(null)
+    await load()
+
+  } catch (err: any) {
+    const msg =
+      err?.response?.data?.message ||
+      err?.message ||
+      "Failed to delete profile"
+    setFormErr(msg)
+  } finally {
+    setDeleteLoading(false)
+  }
+}
 
   const actions: ProfileRowActions = {
     onView: handleViewRow,
@@ -131,7 +176,6 @@ export default function Profile() {
   }
 
   const columns = useMemo(() => createColumns(actions), [actions])
-
 
   // ---------- load list from backend ----------
   const load = useCallback(async () => {
@@ -422,6 +466,38 @@ export default function Profile() {
           </DialogContent>
         </Dialog>
       </div>
+
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete Profile</DialogTitle>
+            <DialogDescription>
+              {deleteTarget
+                ? `Are you sure you want to delete profile ${deleteTarget.code}?`
+                : "Are you sure you want to delete this profile?"}
+              <br />
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteOpen(false)}
+              disabled={deleteLoading}
+            >
+              Cancel
+            </Button>
+
+            <Button
+              variant="destructive"
+              onClick={handleConfirmDelete}
+              disabled={deleteLoading}
+            >
+              {deleteLoading ? "Deleting…" : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Table */}
       <div className="rounded-md border min-h-[120px]">

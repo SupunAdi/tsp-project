@@ -43,7 +43,6 @@ export default function InstanceManagement() {
   const dir = sorting[0]?.desc ? "desc" : "asc"
 
 
-
   // ------- dialog & form state --------
   const [open, setOpen] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -112,9 +111,53 @@ export default function InstanceManagement() {
     setOpen(true)
   }, [])
 
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<InstanceRecord | null>(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+
   const handleDeleteRow = useCallback((row: InstanceRecord) => {
-    console.log("Delete instance (not implemented)", row.instanceId)
+    setDeleteTarget(row)
+    setDeleteOpen(true)
   }, [])
+
+const handleConfirmDelete = async () => {
+  if (!deleteTarget) return
+
+  try {
+    setDeleteLoading(true)
+    setFormErr(null)
+
+    const payload = {
+      traceId: "123456",        // Or generate a new traceId if required
+      instanceId: deleteTarget.instanceId,
+      eventId: null,
+    }
+
+    const res = await api.post("/tsp/v1/instance/remove-instance", payload)
+
+    const ok =
+      res?.data?.code === "00" ||
+      res?.data?.code === "TSP_REQUEST_PROCESS_SUCCESS"
+
+    if (!ok) {
+      setFormErr(res?.data?.message || "Failed to delete instance")
+      return
+    }
+
+    setDeleteOpen(false)
+    setDeleteTarget(null)
+    await load()
+      } catch (err: any) {
+        const msg =
+          err?.response?.data?.message ||
+          err?.message ||
+          "Failed to delete instance"
+        setFormErr(msg)
+      } finally {
+        setDeleteLoading(false)
+      }
+    }
+
 
   const actions: InstanceRowActions = {
     onView: handleViewRow,
@@ -367,7 +410,7 @@ export default function InstanceManagement() {
                   </div>
                 )}
             </div>
-            
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)} disabled={saving}>
               Cancel
@@ -379,6 +422,38 @@ export default function InstanceManagement() {
         </DialogContent>
       </Dialog>
     </div>
+
+     <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete Instance</DialogTitle>
+            <DialogDescription>
+              {deleteTarget
+                ? `Are you sure you want to delete instance ${deleteTarget.instanceId}?`
+                : "Are you sure you want to delete this instance?"}
+              <br />
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteOpen(false)}
+              disabled={deleteLoading}
+            >
+              Cancel
+            </Button>
+
+            <Button
+              variant="destructive"
+              onClick={handleConfirmDelete}
+              disabled={deleteLoading}
+            >
+              {deleteLoading ? "Deleting…" : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
 
       {/* Table */ }
