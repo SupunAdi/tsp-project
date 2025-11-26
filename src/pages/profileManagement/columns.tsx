@@ -24,6 +24,8 @@ export type ProfileRowActions = {
   onView: (row: PofileRecord) => void
   onEdit: (row: PofileRecord) => void
   onDelete: (row: PofileRecord) => void
+  onActivate: (row: PofileRecord) => void
+  onDeactivate: (row: PofileRecord) => void
 }
 
 const short = (s: string, head = 8, tail = 6) =>
@@ -52,19 +54,6 @@ return [
       enableSorting: true,
       enableHiding: true,
     },
-    // {
-    //   accessorKey: "dek", 
-    //   header: () => (
-    //     <div className="text-center">
-    //       <Button variant="ghost" >Dek</Button>
-    //     </div>
-    //   ),
-    //   cell: ({ row }) => (
-    //     <div className="text-center tabular-nums">{short(row.original.dek)}</div>
-    //   ),
-    //   enableSorting: false,
-    //   enableHiding: true,
-    // },
     {
       accessorKey: "cardExpiryCode", 
       header: ({ column }) => <SortHeader column={column} label="Card Expire Code" />,
@@ -115,6 +104,8 @@ return [
       header: () => <div className="text-center">Action</div>,
       cell: ({ row }) => {
         const rec = row.original
+        const isActive = rec.profileStatus?.toUpperCase() === "ACT" || rec.profileStatus?.toUpperCase() === "ACTIVE"
+        
         return (
           <div className="text-center">
             <DropdownMenu>
@@ -132,17 +123,17 @@ return [
                 <DropdownMenuItem onClick={() => actions.onEdit(rec)}>
                   Edit
                 </DropdownMenuItem>
-                {/* <DropdownMenuSeparator /> */}
-                {/* <DropdownMenuItem onClick={() => actions.onDelete(rec)}>
-                  Delete
-                </DropdownMenuItem> */}
-
-                <DropdownMenuItem onClick={() => alert(`Toggling ${rec.code}`)}>
-                  {rec.profileStatus === "active" ? "Deactivate" : "Activate"}
-                </DropdownMenuItem>
-
-
                 
+                {/* Activate/Deactivate action based on current status */}
+                {!isActive ? (
+                  <DropdownMenuItem onClick={() => actions.onActivate(rec)}>
+                    Activate
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem onClick={() => actions.onDeactivate(rec)}>
+                    Deactivate
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

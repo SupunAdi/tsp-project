@@ -75,6 +75,39 @@ export default function Profile() {
   const start = total === 0 ? 0 : (page - 1) * pageSize + 1
   const end = Math.min(page * pageSize, total)
 
+  // ---------- load list from backend ----------
+  const load = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const res = await api.get<PageResponse<PofileRecord>>("/tsp/v1/profile", {
+        params: {
+          page: page - 1, // backend is 0-based
+          size: pageSize,
+          sort,
+          dir,
+        },
+      })
+
+      setRows(res.data.content ?? [])
+      setTotal(res.data.totalElements ?? 0)
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || "Failed to load profiles"
+      setError(msg)
+    } finally {
+      setLoading(false)
+    }
+  }, [page, pageSize, sort, dir])
+
+  useEffect(() => {
+    load()
+  }, [load])
+
+  useEffect(() => {
+    setPage(1)
+  }, [sorting])
+
   const resetForm = () => {
     setCardExpiryProfile("")
     setAccountExpiryProfile("")
@@ -98,6 +131,76 @@ export default function Profile() {
   }
 
   // ---------- row action handlers ----------
+  const handleActivateRow = useCallback(async (row: PofileRecord) => {
+    try {
+      const generatedTraceId = generateTraceId()
+      const payload = {
+        traceId: generatedTraceId,
+        profileId: row.code,
+        eventId: ""
+      }
+
+      // Optimistic update - update UI immediately
+      setRows(prevRows => 
+        prevRows.map(item => 
+          item.code === row.code 
+            ? { ...item, profileStatus: "ACT" }
+            : item
+        )
+      )
+
+      const response = await api.post("/tsp/v1/profile/activate-profile", payload)
+
+      if (response.data.code === "TSP_REQUEST_PROCESS_SUCCESS") {
+        console.log("Profile activated successfully")
+      } else {
+        // Revert on error
+        await load()
+        throw new Error(response.data.message || "Activation failed")
+      }
+    } catch (err: any) {
+      // Revert on error
+      await load()
+      const msg = err?.response?.data?.message || err?.message || "Failed to activate profile"
+      setError(msg)
+    }
+  }, [load])
+
+  const handleDeactivateRow = useCallback(async (row: PofileRecord) => {
+    try {
+      const generatedTraceId = generateTraceId()
+      const payload = {
+        traceId: generatedTraceId,
+        profileId: row.code,
+        eventId: ""
+      }
+
+      // Optimistic update - update UI immediately
+      setRows(prevRows => 
+        prevRows.map(item => 
+          item.code === row.code 
+            ? { ...item, profileStatus: "DEACT" }
+            : item
+        )
+      )
+
+      const response = await api.post("/tsp/v1/profile/deactivate-profile", payload)
+
+      if (response.data.code === "TSP_REQUEST_PROCESS_SUCCESS") {
+        console.log("Profile deactivated successfully")
+      } else {
+        // Revert on error
+        await load()
+        throw new Error(response.data.message || "Deactivation failed")
+      }
+    } catch (err: any) {
+      // Revert on error
+      await load()
+      const msg = err?.response?.data?.message || err?.message || "Failed to deactivate profile"
+      setError(msg)
+    }
+  }, [load])
+
   const handleViewRow = useCallback((row: PofileRecord) => {
     console.log("View profile", row.code)
   }, [])
@@ -131,7 +234,6 @@ export default function Profile() {
     setDeleteOpen(true)
   }, [])
 
-
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return
 
@@ -142,9 +244,9 @@ export default function Profile() {
       const generatedTraceId = generateTraceId()
 
       const payload = {
-        traceId: generatedTraceId,        // Or generate a new traceId if required
+        traceId: generatedTraceId,
         profileId: deleteTarget.code,
-        eventId: null,
+        eventId: "",
       }
 
       const res = await api.post("/tsp/v1/profile/remove-profile", payload)
@@ -177,42 +279,11 @@ export default function Profile() {
     onView: handleViewRow,
     onEdit: handleEditRow,
     onDelete: handleDeleteRow,
+    onActivate: handleActivateRow,
+    onDeactivate: handleDeactivateRow,
   }
 
   const columns = useMemo(() => createColumns(actions), [actions])
-
-  // ---------- load list from backend ----------
-  const load = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(null)
-
-      const res = await api.get<PageResponse<PofileRecord>>("/tsp/v1/profile", {
-        params: {
-          page: page - 1, // backend is 0-based
-          size: pageSize,
-          sort,
-          dir,
-        },
-      })
-
-      setRows(res.data.content ?? [])
-      setTotal(res.data.totalElements ?? 0)
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.message || "Failed to load profiles"
-      setError(msg)
-    } finally {
-      setLoading(false)
-    }
-  }, [page, pageSize, sort, dir])
-
-  useEffect(() => {
-    load()
-  }, [load])
-
-  useEffect(() => {
-    setPage(1)
-  }, [sorting])
 
   // ---------- Save (create / edit) ----------
   const handleSave = async () => {
@@ -259,7 +330,7 @@ export default function Profile() {
           const statusPayload = {
             traceId: generatedTraceId,
             profileId: editingCode,
-            eventId: null,
+            eventId: "",
           }
 
           if (status === "ACT") {
@@ -296,6 +367,14 @@ export default function Profile() {
       setSaving(false)
     }
   }
+
+  // Calculate active/deactive counts for KPI cards
+  const activeCount = rows.filter(r => 
+    r.profileStatus?.toUpperCase() === "ACT" || r.profileStatus?.toUpperCase() === "ACTIVE"
+  ).length
+  const deactiveCount = rows.filter(r => 
+    r.profileStatus?.toUpperCase() === "DEACT" || r.profileStatus?.toUpperCase() === "DEACTIVE"
+  ).length
 
   return (
     <div className="space-y-4">
@@ -342,7 +421,7 @@ export default function Profile() {
             <CardDescription>Currently enabled</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-semibold">—</div>
+            <div className="text-3xl font-semibold">{loading ? "—" : activeCount}</div>
           </CardContent>
         </Card>
 
@@ -355,7 +434,7 @@ export default function Profile() {
             <CardDescription>Currently disabled</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-semibold">—</div>
+            <div className="text-3xl font-semibold">{loading ? "—" : deactiveCount}</div>
           </CardContent>
         </Card>
 
