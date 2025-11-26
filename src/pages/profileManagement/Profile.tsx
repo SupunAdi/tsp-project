@@ -50,6 +50,11 @@ export default function Profile() {
   const sort = sorting[0]?.id
   const dir = sorting[0]?.desc ? "desc" : "asc"
 
+  const generateTraceId = (): string => {
+    const timestamp = Date.now().toString().slice(-3) // Last 3 digits of timestamp
+    const random = Math.floor(100 + Math.random() * 900).toString() // 3 random digits
+    return timestamp + random // Combine for 6 digits
+  }
 
   // ------- dialog & form state --------
   const [open, setOpen] = useState(false)
@@ -59,7 +64,6 @@ export default function Profile() {
   const [mode, setMode] = useState<Mode>("create")
   const [editingCode, setEditingCode] = useState<string | null>(null)
 
-  const [traceId, setTraceId] = useState("")
   const [cardExpiryProfile, setCardExpiryProfile] = useState("")
   const [accountExpiryProfile, setAccountExpiryProfile] = useState("")
   const [tokenLength, setTokenLength] = useState("")
@@ -72,7 +76,6 @@ export default function Profile() {
   const end = Math.min(page * pageSize, total)
 
   const resetForm = () => {
-    setTraceId("")
     setCardExpiryProfile("")
     setAccountExpiryProfile("")
     setTokenLength("")
@@ -115,7 +118,6 @@ export default function Profile() {
     setStatus(normalized)
     setOriginalStatus(normalized)
 
-    setTraceId("") // user must enter a new 6-digit traceId for the request
     setFormErr(null)
     setOpen(true)
   }, [])
@@ -130,44 +132,46 @@ export default function Profile() {
   }, [])
 
 
-const handleConfirmDelete = async () => {
-  if (!deleteTarget) return
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return
 
-  try {
-    setDeleteLoading(true)
-    setFormErr(null)
+    try {
+      setDeleteLoading(true)
+      setFormErr(null)
 
-    const payload = {
-      traceId: "123456",        // Or generate a new traceId if required
-      profileId: deleteTarget.code,
-      eventId: null,
+      const generatedTraceId = generateTraceId()
+
+      const payload = {
+        traceId: generatedTraceId,        // Or generate a new traceId if required
+        profileId: deleteTarget.code,
+        eventId: null,
+      }
+
+      const res = await api.post("/tsp/v1/profile/remove-profile", payload)
+
+      const ok =
+        res?.data?.code === "00" ||
+        res?.data?.code === "TSP_REQUEST_PROCESS_SUCCESS"
+
+      if (!ok) {
+        setFormErr(res?.data?.message || "Failed to delete profile")
+        return
+      }
+
+      setDeleteOpen(false)
+      setDeleteTarget(null)
+      await load()
+
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Failed to delete profile"
+      setFormErr(msg)
+    } finally {
+      setDeleteLoading(false)
     }
-
-    const res = await api.post("/tsp/v1/profile/remove-profile", payload)
-
-    const ok =
-      res?.data?.code === "00" ||
-      res?.data?.code === "TSP_REQUEST_PROCESS_SUCCESS"
-
-    if (!ok) {
-      setFormErr(res?.data?.message || "Failed to delete profile")
-      return
-    }
-
-    setDeleteOpen(false)
-    setDeleteTarget(null)
-    await load()
-
-  } catch (err: any) {
-    const msg =
-      err?.response?.data?.message ||
-      err?.message ||
-      "Failed to delete profile"
-    setFormErr(msg)
-  } finally {
-    setDeleteLoading(false)
   }
-}
 
   const actions: ProfileRowActions = {
     onView: handleViewRow,
@@ -216,11 +220,8 @@ const handleConfirmDelete = async () => {
       setSaving(true)
       setFormErr(null)
 
-      if (!/^\d{6}$/.test(traceId)) {
-        setFormErr("Trace Id must be exactly 6 digits")
-        setSaving(false)
-        return
-      }
+      const generatedTraceId = generateTraceId()
+      
       if (!tokenLength?.trim()) {
         setFormErr("Token Length is required")
         setSaving(false)
@@ -228,7 +229,7 @@ const handleConfirmDelete = async () => {
       }
 
       const payload = {
-        traceId: traceId.trim(),
+        traceId: generatedTraceId,
         cardExpiryProfile: cardExpiryProfile.trim(),
         accountExpiryProfile: accountExpiryProfile.trim(),
         tokenLength: tokenLength.trim(),
@@ -256,7 +257,7 @@ const handleConfirmDelete = async () => {
         // If status changed, call activate/deactivate
         if (status !== originalStatus) {
           const statusPayload = {
-            traceId: traceId.trim(),
+            traceId: generatedTraceId,
             profileId: editingCode,
             eventId: null,
           }
@@ -399,15 +400,6 @@ const handleConfirmDelete = async () => {
             )}
 
             <div className="grid gap-4 py-2">
-              <div className="grid gap-2">
-                <Label htmlFor="traceId">Trace Id</Label>
-                <Input
-                  id="traceId"
-                  placeholder="123456"
-                  value={traceId}
-                  onChange={(e) => setTraceId(e.target.value.trim())}
-                />
-              </div>
 
               <div className="grid gap-2">
                 <Label htmlFor="accountExpiryProfile">Account Expiry Profile</Label>

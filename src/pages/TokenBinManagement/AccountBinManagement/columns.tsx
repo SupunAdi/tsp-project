@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { MoreHorizontal, ArrowUp, ArrowDown } from "lucide-react"
 
 /** ---------------- Types ---------------- */
@@ -16,6 +16,12 @@ export type AccountBinRecord = {
   lastUpdatedUser: string
 }
 
+// Updated actions type with activate/deactivate
+export type AccountBinRowActions = {
+  onEdit: (row: AccountBinRecord) => void
+  onActivate: (row: AccountBinRecord) => void
+  onDeactivate: (row: AccountBinRecord) => void
+}
 
 const DateCell: React.FC<{ value?: string }> = ({ value }) => {
   if (!value) return <span>—</span>
@@ -41,17 +47,15 @@ const displayValue = (val?: string | null) => {
   return val
 }
 
-export function createColumns(): ColumnDef<AccountBinRecord>[] {
-    return [
+export function createColumns(actions: AccountBinRowActions): ColumnDef<AccountBinRecord>[] {
+  return [
     {
       accessorKey: "tokenBin",
       header: ({ column }) => <SortHeader column={column} label="Account BIN" />,
-      cell: ({row}) => <div className="text-center font-medium">{row.original.accountTokenBin}</div>,
-
+      cell: ({ row }) => <div className="text-center font-medium">{row.original.accountTokenBin}</div>,
       enableSorting: true,
       enableHiding: true,
     },
-
     {
       accessorKey: "bankCode",
       header: ({ column }) => <SortHeader column={column} label="Bank Code" />,
@@ -59,8 +63,7 @@ export function createColumns(): ColumnDef<AccountBinRecord>[] {
       enableSorting: true,
       enableHiding: true,
     },
-
-     {
+    {
       accessorKey: "binSize",
       header: ({ column }) => <SortHeader column={column} label="BIN Size" />,
       cell: ({ row }) => <div className="text-center tabular-nums">{row.original.binSize}</div>,
@@ -107,7 +110,6 @@ export function createColumns(): ColumnDef<AccountBinRecord>[] {
       accessorKey: "lastUpdatedUser",
       header: ({ column }) => <SortHeader column={column} label="Last Update User" />,
       cell: ({ row }) => <div className="text-center">{row.original.lastUpdatedUser || "—"}</div>,
-
       enableSorting: true,
       enableHiding: true,
     },
@@ -116,6 +118,8 @@ export function createColumns(): ColumnDef<AccountBinRecord>[] {
       header: () => <div className="text-center">Action</div>,
       cell: ({ row }) => {
         const rec = row.original
+        const isActive = rec.status === "active"
+        
         return (
           <div className="text-center">
             <DropdownMenu>
@@ -127,15 +131,20 @@ export function createColumns(): ColumnDef<AccountBinRecord>[] {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-
-                <DropdownMenuItem onClick={() => alert(`Toggling ${rec.accountTokenBin}`)}>
-                  {rec.status === "active" ? "Deactivate" : "Activate"}
+                
+                <DropdownMenuItem onClick={() => actions.onEdit(rec)}>
+                  Edit
                 </DropdownMenuItem>
-
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => alert(`Editing BIN ${rec.accountTokenBin}`)}>Edit</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => alert(`Deleting BIN ${rec.accountTokenBin}`)}>Delete</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => alert(`Viewing BIN ${rec.accountTokenBin}`)}>View</DropdownMenuItem>
+                
+                {!isActive ? (
+                  <DropdownMenuItem onClick={() => actions.onActivate(rec)}>
+                    Activate
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem onClick={() => actions.onDeactivate(rec)}>
+                    Deactivate
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -146,4 +155,3 @@ export function createColumns(): ColumnDef<AccountBinRecord>[] {
     },
   ]
 }
-

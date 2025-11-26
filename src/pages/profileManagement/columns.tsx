@@ -5,7 +5,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { MoreHorizontal, ArrowUp, ArrowDown } from "lucide-react"
@@ -53,19 +52,19 @@ return [
       enableSorting: true,
       enableHiding: true,
     },
-    {
-      accessorKey: "dek", 
-      header: () => (
-        <div className="text-center">
-          <Button variant="ghost" >Dek</Button>
-        </div>
-      ),
-      cell: ({ row }) => (
-        <div className="text-center tabular-nums">{short(row.original.dek)}</div>
-      ),
-      enableSorting: false,
-      enableHiding: true,
-    },
+    // {
+    //   accessorKey: "dek", 
+    //   header: () => (
+    //     <div className="text-center">
+    //       <Button variant="ghost" >Dek</Button>
+    //     </div>
+    //   ),
+    //   cell: ({ row }) => (
+    //     <div className="text-center tabular-nums">{short(row.original.dek)}</div>
+    //   ),
+    //   enableSorting: false,
+    //   enableHiding: true,
+    // },
     {
       accessorKey: "cardExpiryCode", 
       header: ({ column }) => <SortHeader column={column} label="Card Expire Code" />,
@@ -127,16 +126,23 @@ return [
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => actions.onView(rec)}>
+                {/* <DropdownMenuItem onClick={() => actions.onView(rec)}>
                   View
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuItem onClick={() => actions.onEdit(rec)}>
                   Edit
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => actions.onDelete(rec)}>
+                {/* <DropdownMenuSeparator /> */}
+                {/* <DropdownMenuItem onClick={() => actions.onDelete(rec)}>
                   Delete
+                </DropdownMenuItem> */}
+
+                <DropdownMenuItem onClick={() => alert(`Toggling ${rec.code}`)}>
+                  {rec.profileStatus === "active" ? "Deactivate" : "Activate"}
                 </DropdownMenuItem>
+
+
+                
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

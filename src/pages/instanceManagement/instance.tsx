@@ -42,6 +42,11 @@ export default function InstanceManagement() {
   const sort = sorting[0]?.id
   const dir = sorting[0]?.desc ? "desc" : "asc"
 
+    const generateTraceId = (): string => {
+    const timestamp = Date.now().toString().slice(-3) // Last 3 digits of timestamp
+    const random = Math.floor(100 + Math.random() * 900).toString() // 3 random digits
+    return timestamp + random // Combine for 6 digits
+  }
 
   // ------- dialog & form state --------
   const [open, setOpen] = useState(false)
@@ -51,7 +56,6 @@ export default function InstanceManagement() {
   const [mode, setMode] = useState<Mode>("create")
   const [editingCode, setEditingCode] = useState<string | null>(null)
 
-  const [traceId, setTraceId] = useState("")
   const [instanceName, setInstanceName] = useState("")
   const [profileId, setProfileId] = useState("")
 
@@ -63,7 +67,6 @@ export default function InstanceManagement() {
   const end = Math.min(page * pageSize, total)
 
   const resetForm = () => {
-    setTraceId("")
     setInstanceName("")
     setProfileId("")
     setStatus("DEACT")
@@ -87,9 +90,9 @@ export default function InstanceManagement() {
 
 
   // ---------- row action handlers ----------
-  const handleViewRow = useCallback((row: InstanceRecord) => {
-    console.log("View instance", row.instanceId)
-  }, [])
+  // const handleViewRow = useCallback((row: InstanceRecord) => {
+  //   console.log("View instance", row.instanceId)
+  // }, [])
 
   const handleEditRow = useCallback((row: InstanceRecord) => {
     setMode("edit")
@@ -106,63 +109,64 @@ export default function InstanceManagement() {
     setStatus(normalized)
     setOriginalStatus(normalized)
 
-    setTraceId("") // user must enter a new 6-digit traceId for the request
     setFormErr(null)
     setOpen(true)
   }, [])
 
-  const [deleteOpen, setDeleteOpen] = useState(false)
-  const [deleteTarget, setDeleteTarget] = useState<InstanceRecord | null>(null)
-  const [deleteLoading, setDeleteLoading] = useState(false)
+  // const [deleteOpen, setDeleteOpen] = useState(false)
+  // const [deleteTarget, setDeleteTarget] = useState<InstanceRecord | null>(null)
+  // const [deleteLoading, setDeleteLoading] = useState(false)
 
-  const handleDeleteRow = useCallback((row: InstanceRecord) => {
-    setDeleteTarget(row)
-    setDeleteOpen(true)
-  }, [])
+  // const handleDeleteRow = useCallback((row: InstanceRecord) => {
+  //   setDeleteTarget(row)
+  //   setDeleteOpen(true)
+  // }, [])
 
-const handleConfirmDelete = async () => {
-  if (!deleteTarget) return
+// const handleConfirmDelete = async () => {
+//   if (!deleteTarget) return
 
-  try {
-    setDeleteLoading(true)
-    setFormErr(null)
+//   try {
+//     setDeleteLoading(true)
+//     setFormErr(null)
 
-    const payload = {
-      traceId: "123456",        // Or generate a new traceId if required
-      instanceId: deleteTarget.instanceId,
-      eventId: null,
-    }
+//     const generatedTraceId = generateTraceId()
 
-    const res = await api.post("/tsp/v1/instance/remove-instance", payload)
+//     const payload = {
+//       traceId: generatedTraceId,        
+//       instanceId: deleteTarget.instanceId,
+//       eventId: null,
+//     }
 
-    const ok =
-      res?.data?.code === "00" ||
-      res?.data?.code === "TSP_REQUEST_PROCESS_SUCCESS"
+//     const res = await api.post("/tsp/v1/instance/remove-instance", payload)
 
-    if (!ok) {
-      setFormErr(res?.data?.message || "Failed to delete instance")
-      return
-    }
+//     const ok =
+//       res?.data?.code === "00" ||
+//       res?.data?.code === "TSP_REQUEST_PROCESS_SUCCESS"
 
-    setDeleteOpen(false)
-    setDeleteTarget(null)
-    await load()
-      } catch (err: any) {
-        const msg =
-          err?.response?.data?.message ||
-          err?.message ||
-          "Failed to delete instance"
-        setFormErr(msg)
-      } finally {
-        setDeleteLoading(false)
-      }
-    }
+//     if (!ok) {
+//       setFormErr(res?.data?.message || "Failed to delete instance")
+//       return
+//     }
+
+//     setDeleteOpen(false)
+//     setDeleteTarget(null)
+//     await load()
+//       } catch (err: any) {
+//         const msg =
+//           err?.response?.data?.message ||
+//           err?.message ||
+//           "Failed to delete instance"
+//         setFormErr(msg)
+//       } finally {
+//         setDeleteLoading(false)
+//       }
+//     }
 
 
   const actions: InstanceRowActions = {
-    onView: handleViewRow,
-    onEdit: handleEditRow,
-    onDelete: handleDeleteRow,
+    // onView: handleViewRow,
+    onEdit: handleEditRow
+    // onDelete: handleDeleteRow,
   }
 
   const columns = useMemo(() => createColumns(actions), [actions])
@@ -206,11 +210,8 @@ const handleConfirmDelete = async () => {
       setSaving(true)
       setFormErr(null)
 
-      if (!/^\d{6}$/.test(traceId)) {
-        setFormErr("Trace Id must be exactly 6 digits")
-        setSaving(false)
-        return
-      }
+      const generatedTraceId = generateTraceId()
+  
       if (!instanceName?.trim()) {
         setFormErr("Instance name is required")
         setSaving(false)
@@ -218,7 +219,7 @@ const handleConfirmDelete = async () => {
       }
 
       const payload = {
-        traceId: traceId.trim(),
+        traceId: generatedTraceId,
         instanceName: instanceName.trim(),
         profileId: profileId.trim(),
 
@@ -246,7 +247,7 @@ const handleConfirmDelete = async () => {
         // If status changed, call activate/deactivate
         if (status !== originalStatus) {
           const statusPayload = {
-            traceId: traceId.trim(),
+            traceId: generatedTraceId,
             instanceId: editingCode,
             eventId: null,
           }
@@ -367,16 +368,6 @@ const handleConfirmDelete = async () => {
 
             <div className="grid gap-4 py-2">
               <div className="grid gap-2">
-                <Label htmlFor="traceId">Trace Id</Label>
-                <Input
-                  id="traceId"
-                  placeholder="123456"
-                  value={traceId}
-                  onChange={(e) => setTraceId(e.target.value.trim())}
-                />
-              </div>
-
-              <div className="grid gap-2">
                 <Label htmlFor="instanceName">Instance Name</Label>
                 <Input
                   id="instanceName"
@@ -423,7 +414,7 @@ const handleConfirmDelete = async () => {
       </Dialog>
     </div>
 
-     <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+     {/* <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Delete Instance</DialogTitle>
@@ -453,7 +444,7 @@ const handleConfirmDelete = async () => {
             </Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
 
 
       {/* Table */ }

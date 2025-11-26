@@ -6,7 +6,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ArrowUp, ArrowDown, MoreHorizontal } from "lucide-react"
@@ -28,9 +27,9 @@ const DateCell: React.FC<{ value?: string }> = ({ value }) => {
 }
 
 export type InstanceRowActions = {
-  onView: (row: InstanceRecord) => void
+  onView?: (row: InstanceRecord) => void
   onEdit: (row: InstanceRecord) => void
-  onDelete: (row: InstanceRecord) => void
+  onDelete?: (row: InstanceRecord) => void
 }
 
 
@@ -125,16 +124,21 @@ return [
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => actions.onView(rec)}>
+                {/* <DropdownMenuItem onClick={() => actions.onView(rec)}>
                   View
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuItem onClick={() => actions.onEdit(rec)}>
                   Edit
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => actions.onDelete(rec)}>
+                {/* <DropdownMenuSeparator /> */}
+                {/* <DropdownMenuItem onClick={() => actions.onDelete(rec)}>
                   Delete
+                </DropdownMenuItem> */}
+
+                <DropdownMenuItem onClick={() => alert(`Toggling ${rec.instanceId}`)}>
+                  {rec.instanceStatus === "active" ? "Deactivate" : "Activate"}
                 </DropdownMenuItem>
+
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
