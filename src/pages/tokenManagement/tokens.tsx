@@ -1,14 +1,8 @@
-import { useEffect, useMemo, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import PaginationBar from "@/components/pagination-bar"
-import { usePagination } from "@/hooks/use-pagination"
 import { CreditCard, CheckCircle2, XCircle, Clock , RefreshCcw } from "lucide-react"
-import type { TokenManagementRecord } from "./columns"
+import type { TokenManagementRecord, TokenRowActions } from "./columns"
 
 import { DataTable } from "@/components/ui/data-table"
 
@@ -30,8 +24,6 @@ type PageResponse<T> = {
   hasNext: boolean
   hasPrevious: boolean
 }
-
-
 
 export default function TokenBills() {
   const [rows, setRows] = useState<TokenManagementRecord[]>([])
@@ -77,13 +69,91 @@ export default function TokenBills() {
   useEffect(() => { load() }, [page, pageSize, sort, dir])
   useEffect(() => { setPage(1) }, [sorting])
 
-  const columns = useMemo(() => createColumns(), [])
+  const generateTraceId = (): string => {
+  const timestamp = Date.now().toString().slice(-3) // Last 3 digits of timestamp
+  const random = Math.floor(100 + Math.random() * 900).toString() // 3 random digits
+  return timestamp + random // Combine for 6 digits
+  }
 
+   // ---------- row action handlers ----------
+  const handleActivateRow = useCallback(async (row: TokenManagementRecord) => {
+    try {
+      const generatedTraceId = generateTraceId()
+      const payload = {
+        traceId: generatedTraceId,
+        token: row.token,
+        eventId: ""
+      }
+
+      // Optimistic update - update UI immediately
+      setRows(prevRows => 
+        prevRows.map(item => 
+          item.token === row.token 
+            ? { ...item, status: "ACT" }
+            : item
+        )
+      )
+
+      const response = await api.post("/tsp/v1/token-management/activate-token", payload)
+      if (response.data.code === "TSP_REQUEST_PROCESS_SUCCESS") {
+        console.log("Token activated successfully")
+      } else {
+        // Revert on error
+        await load()
+        throw new Error(response.data.message || "Activation failed")
+      }
+    } catch (err: any) {
+      // Revert on error
+      await load()
+      const msg = err?.response?.data?.message || err?.message || "Failed to activate profile"
+      setError(msg)
+    }
+  }, [load])
+
+  const handleDeactivateRow = useCallback(async (row: TokenManagementRecord) => {
+  try {
+    const generatedTraceId = generateTraceId()
+    const payload = {
+      traceId: generatedTraceId,
+      token: row.token,
+      eventId: ""
+    }
+
+    // Optimistic update - update UI immediately
+    setRows(prevRows => 
+      prevRows.map(item => 
+        item.token === row.token 
+          ? { ...item, profileStatus: "DEACT" }
+          : item
+      )
+    )
+
+    const response = await api.post("/tsp/v1/token-management/deactivate-token", payload)
+    if (response.data.code === "TSP_REQUEST_PROCESS_SUCCESS") {
+      console.log("Token deactivated successfully")
+    } else {
+      // Revert on error
+      await load()
+      throw new Error(response.data.message || "Deactivation failed")
+    }
+  } catch (err: any) {
+    // Revert on error
+    await load()
+    const msg = err?.response?.data?.message || err?.message || "Failed to deactivate profile"
+    setError(msg)
+  }
+  }, [load])
+
+    const actions: TokenRowActions = {
+      onActivate: handleActivateRow,
+      onDeactivate: handleDeactivateRow,
+    }
+
+   const columns = useMemo(() => createColumns(actions), [actions])
+  
   const pageCount = Math.max(1, Math.ceil(total / pageSize))
   const start = total === 0 ? 0 : (page - 1) * pageSize + 1
   const end = Math.min(page * pageSize, total)
-
-
 
   return (
     <div className="space-y-4">
@@ -158,88 +228,6 @@ export default function TokenBills() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Add New Modal  */}
-      {/* <div className="flex justify-end w-full -mt-1 mb-2"> */}
-        {/* <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button className="sm:ml-auto">Add New Card Bin</Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Add New Card BIN</DialogTitle>
-              <DialogDescription>Fill details and click Save. This is a frontend preview only.</DialogDescription>
-            </DialogHeader>
-
-            <div className="grid gap-4 py-2">
-              <div className="grid gap-2">
-                <Label htmlFor="bin">BIN Number</Label>
-                <Input
-                  id="bin"
-                  inputMode="numeric"
-                  placeholder="Enter digits only"
-                  value={form.bin}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, bin: e.target.value.replace(/\D/g, "") }))
-                  }
-                />
-              </div> */}
-
-              {/* Card Association */}
-              {/* <div className="grid gap-2">
-                <Label>Card Association</Label>
-                <Select
-                  value={form.cardAssociation}
-                  onValueChange={(val) =>
-                    setForm((f) => ({ ...f, cardAssociation: val as TokenBinRecord["cardAssociation"] }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CARD_ASSOCIATIONS.map((opt) => (
-                      <SelectItem key={opt} value={opt}>
-                        {opt}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div> */}
-
-              {/* BIN Size (auto) */}
-              {/* <div className="grid gap-2">
-                <Label htmlFor="binsize">BIN Size</Label>
-                <Input id="binsize" value={binSize} readOnly />
-              </div> */}
-
-              {/* Bank Code */}
-              {/* <div className="grid gap-2">
-                <Label>Bank Code</Label>
-                <Select
-                  value={form.bankCode}
-                  onValueChange={(val) => setForm((f) => ({ ...f, bankCode: val }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {BANK_CODES.map((code) => (
-                      <SelectItem key={code} value={code}>
-                        {code}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div> */}
-            {/* </div> */}
-
-            {/* <DialogFooter>
-              <Button onClick={handleSave}>Save</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div> */}
 
           {/* Table */}
       <div className="rounded-md border min-h-[120px]">

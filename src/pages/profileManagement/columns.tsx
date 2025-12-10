@@ -28,9 +28,6 @@ export type ProfileRowActions = {
   onDeactivate: (row: PofileRecord) => void
 }
 
-const short = (s: string, head = 8, tail = 6) =>
-  !s ? "" : s.length <= head + tail ? s : `${s.slice(0, head)}…${s.slice(-tail)}`
-
 // Reusable sort header 
 const SortHeader: React.FC<{ column: any; label: string }> = ({ column, label }) => (
   <div className="text-center">

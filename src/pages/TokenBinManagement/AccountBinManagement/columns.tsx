@@ -42,11 +42,6 @@ const SortHeader: React.FC<{ column: any; label: string }> = ({ column, label })
   </div>
 )
 
-const displayValue = (val?: string | null) => {
-  if (val === undefined || val === null || val === "" || val === " ") return "null"
-  return val
-}
-
 export function createColumns(actions: AccountBinRowActions): ColumnDef<AccountBinRecord>[] {
   return [
     {
