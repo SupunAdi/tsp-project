@@ -6,9 +6,7 @@ import type { TokenManagementRecord, TokenRowActions } from "./columns"
 
 import { DataTable } from "@/components/ui/data-table"
 
-
 import { createColumns,} from "./columns"
-
 
 import api from "@/lib/api/api"
 import type { SortingState } from "@tanstack/react-table"
@@ -171,7 +169,7 @@ export default function TokenBills() {
       </div> 
 
       {/* Error banner */}
-      {error && <div className="rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+      {/* {error && <div className="rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-700">{error}</div>} */}
       
 
       {/* KPI Cards  */}

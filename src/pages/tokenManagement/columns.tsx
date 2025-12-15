@@ -65,6 +65,23 @@ const DateCell: React.FC<{ value?: string }> = ({ value }) => {
   return <span>{isNaN(d.getTime()) ? value : d.toLocaleString()}</span>
 }
 
+type TokenStatus = "ACT" | "DEACT" | "EXPIRED";
+
+const STATUS_MAP: Record<TokenStatus, { label: string; className: string }> = {
+  ACT: {
+    label: "Active",
+    className: "bg-black text-white hover:bg-black",
+  },
+  DEACT: {
+    label: "Deactive",
+    className: "bg-white text-black border hover:bg-white",
+  },
+  EXPIRED: {
+    label: "Expired",
+    className: "bg-red-600 text-white hover:bg-red-700",
+  },
+};
+
 export function createColumns(actions: TokenRowActions): ColumnDef<TokenManagementRecord>[] {
 
   return [
@@ -156,26 +173,23 @@ export function createColumns(actions: TokenRowActions): ColumnDef<TokenManageme
       enableSorting: true,
       enableHiding: true,
     },  
+
     {
       accessorKey: "status",
       header: ({ column }) => <SortHeader column={column} label="Status" />,
       cell: ({ row }) => {
-        const s = row.original.status?.toUpperCase()
-        const active = s === "ACT" || s === "ACTIVE"
+        const status = (row.original.status?.toUpperCase() || "DEACT") as TokenStatus;
+        const statusData = STATUS_MAP[status];
+
         return (
           <div className="text-center">
-            <Badge
-              className={
-                active ? "bg-black text-white hover:bg-black": "bg-white text-black border hover:bg-white"}
-            >
-              {active ? "Active" : "Deactive"}
-            </Badge>
+            <Badge className={statusData.className}>{statusData.label}</Badge>
           </div>
-        )
+        );
       },
       enableSorting: true,
       enableHiding: true,
-    }, 
+    },
     {
       accessorKey: "createdTime", 
       header: ({ column }) => <SortHeader column={column} label="Created Time" />,
