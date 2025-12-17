@@ -101,7 +101,7 @@ export function createColumns(actions: TokenRowActions): ColumnDef<TokenManageme
     },
     {
       accessorKey: "cardNumber", 
-      header: ({ column }) => <SortHeader column={column} label="Card Number" />,
+      header: () => <div className="text-center">Card Number</div>,
       cell: ({ row }) => <div className="text-center">{maskPan(row.original.cardNumber) || "—"}</div>,
       enableSorting: true,
       enableHiding: true,
@@ -115,21 +115,21 @@ export function createColumns(actions: TokenRowActions): ColumnDef<TokenManageme
     },    
     {
       accessorKey: "expiry", 
-      header: ({ column }) => <SortHeader column={column} label="Expiry" />,
+      header: () => <div className="text-center">Expiry</div>,
       cell: ({ row }) => <div className="text-center">{row.original.expiry || "—"}</div>,
       enableSorting: true,
       enableHiding: true,
     },   
     {
       accessorKey: "cvv", 
-      header: ({ column }) => <SortHeader column={column} label="CVV" />,
+      header: () => <div className="text-center">CVV</div>,
       cell: ({ row }) => <div className="text-center">{row.original.cvv || "—"}</div>,
       enableSorting: true,
       enableHiding: true,
     },
     {
       accessorKey: "nic", 
-      header: ({ column }) => <SortHeader column={column} label="NIC" />,
+      header: () => <div className="text-center">NIC</div>,
       cell: ({ row }) => <div className="text-center">{displayValue(row.original.nic)}</div>,
       enableSorting: true,
       enableHiding: true,
