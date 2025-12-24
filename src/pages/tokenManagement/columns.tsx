@@ -144,7 +144,7 @@ export function createColumns(actions: TokenRowActions): ColumnDef<TokenManageme
     {
       accessorKey: "accountNumber", 
       header: ({ column }) => <SortHeader column={column} label="Account Number" />,
-      cell: ({ row }) => <div className="text-center">{row.original.accountNumber || "—"}</div>,
+      cell: ({ row }) => <div className="text-center">{maskPan(row.original.accountNumber) || "—"}</div>,
       enableSorting: true,
       enableHiding: true,
     },   
@@ -226,13 +226,13 @@ export function createColumns(actions: TokenRowActions): ColumnDef<TokenManageme
       enableSorting: true,
       enableHiding: true,
     },
-    {
-      accessorKey: "hashCardNumber", 
-      header: ({ column }) => <SortHeader column={column} label="Hash Card Number" />,
-      cell: ({ row }) => <div className="text-center">{row.original.hashCardNumber || "—"}</div>,
-      enableSorting: true,
-      enableHiding: true,
-    },
+    // {
+    //   accessorKey: "hashCardNumber", 
+    //   header: ({ column }) => <SortHeader column={column} label="Hash Card Number" />,
+    //   cell: ({ row }) => <div className="text-center">{row.original.hashCardNumber || "—"}</div>,
+    //   enableSorting: true,
+    //   enableHiding: true,
+    // },
     {
       id: "actions",
       header: () => <div className="text-center">Action</div>,
@@ -270,4 +270,4 @@ export function createColumns(actions: TokenRowActions): ColumnDef<TokenManageme
       enableHiding: true,
     },
   ]
-}
+}g
