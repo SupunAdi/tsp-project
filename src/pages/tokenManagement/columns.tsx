@@ -10,7 +10,6 @@ import {
 import { MoreHorizontal, ArrowUp, ArrowDown, } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
-// Row type must match API payload (TokenManagementResponse)
 export type TokenManagementRecord = {
   id: string
   instanceId: string
@@ -99,13 +98,13 @@ export function createColumns(actions: TokenRowActions): ColumnDef<TokenManageme
       enableSorting: true,
       enableHiding: true,
     },
-    {
-      accessorKey: "cardNumber", 
-      header: () => <div className="text-center">Card Number</div>,
-      cell: ({ row }) => <div className="text-center">{maskPan(row.original.cardNumber) || "—"}</div>,
-      enableSorting: true,
-      enableHiding: true,
-    },   
+    // {
+    //   accessorKey: "cardNumber", 
+    //   header: () => <div className="text-center">Card Number</div>,
+    //   cell: ({ row }) => <div className="text-center">{maskPan(row.original.cardNumber) || "—"}</div>,
+    //   enableSorting: true,
+    //   enableHiding: true,
+    // },   
     {
       accessorKey: "nameOnCard", 
       header: ({ column }) => <SortHeader column={column} label="Name On Card" />,
@@ -113,27 +112,27 @@ export function createColumns(actions: TokenRowActions): ColumnDef<TokenManageme
       enableSorting: true,
       enableHiding: true,
     },    
-    {
-      accessorKey: "expiry", 
-      header: () => <div className="text-center">Expiry</div>,
-      cell: ({ row }) => <div className="text-center">{row.original.expiry || "—"}</div>,
-      enableSorting: true,
-      enableHiding: true,
-    },   
-    {
-      accessorKey: "cvv", 
-      header: () => <div className="text-center">CVV</div>,
-      cell: ({ row }) => <div className="text-center">{row.original.cvv || "—"}</div>,
-      enableSorting: true,
-      enableHiding: true,
-    },
-    {
-      accessorKey: "nic", 
-      header: () => <div className="text-center">NIC</div>,
-      cell: ({ row }) => <div className="text-center">{displayValue(row.original.nic)}</div>,
-      enableSorting: true,
-      enableHiding: true,
-    },    
+    // {
+    //   accessorKey: "expiry", 
+    //   header: () => <div className="text-center">Expiry</div>,
+    //   cell: ({ row }) => <div className="text-center">{row.original.expiry || "—"}</div>,
+    //   enableSorting: true,
+    //   enableHiding: true,
+    // },   
+    // {
+    //   accessorKey: "cvv", 
+    //   header: () => <div className="text-center">CVV</div>,
+    //   cell: ({ row }) => <div className="text-center">{row.original.cvv || "—"}</div>,
+    //   enableSorting: true,
+    //   enableHiding: true,
+    // },
+    // {
+    //   accessorKey: "nic", 
+    //   header: () => <div className="text-center">NIC</div>,
+    //   cell: ({ row }) => <div className="text-center">{displayValue(row.original.nic)}</div>,
+    //   enableSorting: true,
+    //   enableHiding: true,
+    // },    
     {
       accessorKey: "accountHolderName", 
       header: ({ column }) => <SortHeader column={column} label="Account Holder Name" />,
@@ -141,13 +140,13 @@ export function createColumns(actions: TokenRowActions): ColumnDef<TokenManageme
       enableSorting: true,
       enableHiding: true,
     },    
-    {
-      accessorKey: "accountNumber", 
-      header: ({ column }) => <SortHeader column={column} label="Account Number" />,
-      cell: ({ row }) => <div className="text-center">{maskPan(row.original.accountNumber) || "—"}</div>,
-      enableSorting: true,
-      enableHiding: true,
-    },   
+    // {
+    //   accessorKey: "accountNumber", 
+    //   header: ({ column }) => <SortHeader column={column} label="Account Number" />,
+    //   cell: ({ row }) => <div className="text-center">{maskPan(row.original.accountNumber) || "—"}</div>,
+    //   enableSorting: true,
+    //   enableHiding: true,
+    // },   
     {
       accessorKey: "tokenType", 
       header: ({ column }) => <SortHeader column={column} label="Token Type" />,
@@ -270,4 +269,4 @@ export function createColumns(actions: TokenRowActions): ColumnDef<TokenManageme
       enableHiding: true,
     },
   ]
-}g
+}
