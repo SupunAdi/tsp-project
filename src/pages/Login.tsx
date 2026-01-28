@@ -1,6 +1,7 @@
 import { useState } from "react"
 import type { FormEvent } from "react"
 import { useNavigate, Link } from "react-router-dom"
+import api from "@/lib/api/api"
 
 import AuthLayout from "@/Layouts/auth-layout"
 import { Button } from "@/components/ui/button"
@@ -10,14 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import InputError from "@/components/input-error"      
 import { LoaderCircle } from "lucide-react"
 
-type Errors = { email?: string; password?: string }
-
-// super-simple demo auth (accepts any non-empty email/password)
-function fakeAuth(email: string, password: string) {
-  return new Promise<void>((resolve, reject) => {
-    setTimeout(() => (email && password ? resolve() : reject(new Error("Email and password are required"))), 500)
-  })
-}
+type Errors = { email?: string ; password?: string ; common?: string }
 
 export default function Login() {
   const navigate = useNavigate()
@@ -33,15 +27,33 @@ export default function Login() {
     const email = String(fd.get("email") || "")
     const password = String(fd.get("password") || "")
 
-    try {
-      await fakeAuth(email, password)
-      // (optional) remember logged-in state
-      localStorage.setItem("auth", "true")
-      navigate("/dashboard", { replace: true })
-    } catch (err: any) {
+    if (!email || !password) {
       setErrors({
         email: !email ? "Email is required" : undefined,
         password: !password ? "Password is required" : undefined,
+      })
+      setProcessing(false)
+      return
+    }
+
+    try {
+      const res = await api.post("/tsp/v1/auth/login", {
+        email,
+        password,
+      })
+
+      const loginData = res.data?.data
+
+      // Store JWT
+      localStorage.setItem("accessToken", loginData.accessToken)
+      localStorage.setItem("tokenType", loginData.tokenType)
+
+      navigate("/dashboard", { replace: true })
+    } catch (err: any) {
+      setErrors({
+        common:
+          err?.response?.data?.message ||
+          "Invalid email or password",
       })
     } finally {
       setProcessing(false)
@@ -65,9 +77,10 @@ export default function Login() {
               <Label htmlFor="password">Password</Label>
               <Link to="/forgot-password" className="ml-auto text-sm">Forgot password?</Link>
             </div>
-            <Input id="password" name="password" type="password" autoComplete="current-password" placeholder="Password" required />
+            <Input id="password" name="password" type="password" autoComplete="current-password" placeholder="••••••••" required />
             <InputError message={errors.password} />
           </div>
+          <InputError message={errors.common} />
 
           <div className="flex items-center space-x-3">
             <Checkbox id="remember" name="remember" />
