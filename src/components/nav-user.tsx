@@ -14,6 +14,7 @@ import { UserMenuContent } from "@/components/user-menu-content";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { User } from "@/types";
 import { ChevronsUpDown } from "lucide-react";
+import { logout } from "@/lib/auth"  
 
 type NavUserProps = { user: User };
 
@@ -40,7 +41,7 @@ export function NavUser({ user }: NavUserProps) {
             align="end"
             side={isMobile ? "bottom" : state === "collapsed" ? "left" : "bottom"}
           >
-            <UserMenuContent user={user} />
+            <UserMenuContent user={user} onLogout={logout} />
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

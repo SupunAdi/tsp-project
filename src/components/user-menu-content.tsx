@@ -7,7 +7,7 @@ import {
 import { UserInfo } from "@/components/user-info";
 import { useMobileNavigation } from "@/hooks/use-mobile-navigation";
 import type { User } from "@/types";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 import { LogOut, Settings } from "lucide-react";
 import { useCallback } from "react";
 
@@ -22,19 +22,13 @@ export function UserMenuContent({
   user,
   onLogout,
   settingsPath = "/settings",
-  afterLogoutRedirectTo = "/login",
 }: UserMenuContentProps) {
   const cleanup = useMobileNavigation();
-  const navigate = useNavigate();
 
   const handleLogout = useCallback(async () => {
-    try {
-      cleanup();
-      await onLogout?.();
-    } finally {
-      navigate(afterLogoutRedirectTo, { replace: true });
-    }
-  }, [cleanup, onLogout, navigate, afterLogoutRedirectTo]);
+  cleanup()
+  await onLogout?.()   // logout() handles redirects
+}, [cleanup, onLogout])
 
   return (
     <>
