@@ -64,7 +64,7 @@ const DateCell: React.FC<{ value?: string }> = ({ value }) => {
   return <span>{isNaN(d.getTime()) ? value : d.toLocaleString()}</span>
 }
 
-type TokenStatus = "ACT" | "DEACT" | "EXPIRED";
+type TokenStatus = "ACT" | "DEACT" | "EXPIRED" | "REVOKED";
 
 const STATUS_MAP: Record<TokenStatus, { label: string; className: string }> = {
   ACT: {
@@ -77,6 +77,10 @@ const STATUS_MAP: Record<TokenStatus, { label: string; className: string }> = {
   },
   EXPIRED: {
     label: "Expired",
+    className: "bg-red-600 text-white hover:bg-red-700",
+  },
+  REVOKED: {
+    label: "REVOKED",
     className: "bg-red-600 text-white hover:bg-red-700",
   },
 };
